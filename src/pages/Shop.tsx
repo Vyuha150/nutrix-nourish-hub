@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
-import { Heart, Star, Filter } from "lucide-react";
+import { Heart, Star, Filter, Search, X } from "lucide-react";
 import hero from "@/assets/hero-1.jpg";
 import prodPowder from "@/assets/prod-powder.jpg";
 import prodTablet from "@/assets/prod-tablet.jpg";
