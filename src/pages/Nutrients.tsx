@@ -1,40 +1,49 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
-import { Search } from "lucide-react";
+import { Search, ArrowUpRight } from "lucide-react";
 import hero from "@/assets/hero-3.jpg";
 
-type Row = { name: string; type: "Vitamin" | "Mineral" | "Macro" | "Bioactive"; sol: "Fat" | "Water" | "—"; form: string; delivery: string; why: string };
+type Row = {
+  name: string;
+  type: "Vitamin" | "Mineral" | "Macro" | "Bioactive";
+  sol: "Fat" | "Water" | "—";
+  form: string;
+  delivery: string;
+  why: string;
+  product: string; // name of a product in /shop
+};
 
 const data: Row[] = [
-  { name: "Vitamin A (Retinyl palmitate)", type: "Vitamin", sol: "Fat", form: "Pre-formed retinol", delivery: "Softgel with meal", why: "Vision, immunity, skin turnover" },
-  { name: "Vitamin B1 (Thiamine HCl)", type: "Vitamin", sol: "Water", form: "Benfotiamine for nerves", delivery: "Tablet, with food", why: "Energy from carbohydrates" },
-  { name: "Vitamin B2 (Riboflavin-5-phosphate)", type: "Vitamin", sol: "Water", form: "Activated R5P", delivery: "Tablet", why: "Mitochondrial energy" },
-  { name: "Vitamin B3 (Niacinamide)", type: "Vitamin", sol: "Water", form: "Niacinamide (no flush)", delivery: "Tablet", why: "NAD+, skin barrier" },
-  { name: "Vitamin B6 (P-5-P)", type: "Vitamin", sol: "Water", form: "Pyridoxal-5-phosphate", delivery: "Tablet", why: "Neurotransmitter synthesis" },
-  { name: "Folate", type: "Vitamin", sol: "Water", form: "L-methylfolate (5-MTHF)", delivery: "Tablet", why: "DNA synthesis, methylation" },
-  { name: "Vitamin B12", type: "Vitamin", sol: "Water", form: "Methylcobalamin", delivery: "Sublingual or tablet", why: "Nerve, blood, energy" },
-  { name: "Vitamin C", type: "Vitamin", sol: "Water", form: "Liposomal ascorbate", delivery: "Powder or capsule", why: "Antioxidant, collagen, iron uptake" },
-  { name: "Vitamin D3", type: "Vitamin", sol: "Fat", form: "Cholecalciferol + K2 MK-7", delivery: "Softgel with fat", why: "Bone, immunity, mood" },
-  { name: "Vitamin E", type: "Vitamin", sol: "Fat", form: "Mixed tocopherols + tocotrienols", delivery: "Softgel", why: "Lipid antioxidant" },
-  { name: "Vitamin K2", type: "Vitamin", sol: "Fat", form: "Menaquinone-7 (MK-7)", delivery: "Softgel with D3", why: "Calcium routing to bone" },
-  { name: "Calcium", type: "Mineral", sol: "—", form: "Calcium citrate-malate", delivery: "Tablet, split dose", why: "Bone density, signaling" },
-  { name: "Magnesium", type: "Mineral", sol: "—", form: "Glycinate / L-threonate", delivery: "Capsule, evening", why: "300+ enzymes, sleep, muscle" },
-  { name: "Iron", type: "Mineral", sol: "—", form: "Ferrous bisglycinate", delivery: "Tablet with vit C", why: "Oxygen transport" },
-  { name: "Zinc", type: "Mineral", sol: "—", form: "Zinc picolinate", delivery: "Tablet, away from iron/calcium", why: "Immunity, skin, hormones" },
-  { name: "Selenium", type: "Mineral", sol: "—", form: "Selenomethionine", delivery: "Tablet", why: "Thyroid, glutathione" },
-  { name: "Iodine", type: "Mineral", sol: "—", form: "Potassium iodide", delivery: "Tablet", why: "Thyroid hormone synthesis" },
-  { name: "Omega-3 (EPA/DHA)", type: "Macro", sol: "Fat", form: "Algal triglyceride form", delivery: "Softgel with meal", why: "Heart, brain, inflammation" },
-  { name: "Plant Protein", type: "Macro", sol: "—", form: "Pea + rice isolate (full PDCAAS)", delivery: "Powder", why: "Muscle protein synthesis" },
-  { name: "Fibre (Prebiotic)", type: "Macro", sol: "—", form: "Partially hydrolysed guar + acacia", delivery: "Powder, soluble", why: "Microbiome, satiety" },
-  { name: "Creatine", type: "Bioactive", sol: "—", form: "Creatine monohydrate", delivery: "Powder, daily", why: "Strength, cognition" },
-  { name: "Curcumin", type: "Bioactive", sol: "Fat", form: "With piperine or phytosomal", delivery: "Capsule with meal", why: "Anti-inflammatory" },
-  { name: "Ashwagandha", type: "Bioactive", sol: "—", form: "KSM-66 root extract", delivery: "Capsule", why: "Stress adaptation, sleep" },
-  { name: "Probiotics", type: "Bioactive", sol: "—", form: "Multi-strain, ≥10B CFU", delivery: "Capsule, refrigerated", why: "Gut, immunity" },
-  { name: "CoQ10", type: "Bioactive", sol: "Fat", form: "Ubiquinol", delivery: "Softgel with fat", why: "Heart, mitochondria" },
-  { name: "Choline", type: "Bioactive", sol: "Water", form: "Alpha-GPC", delivery: "Capsule", why: "Brain, liver, membranes" },
-  { name: "Lutein + Zeaxanthin", type: "Bioactive", sol: "Fat", form: "FloraGLO 10:2", delivery: "Softgel", why: "Macular health, screens" },
-  { name: "Collagen", type: "Bioactive", sol: "—", form: "Type I + III hydrolysate", delivery: "Powder", why: "Skin, joints, tendons" },
+  { name: "Vitamin A (Retinyl palmitate)", type: "Vitamin", sol: "Fat", form: "Pre-formed retinol", delivery: "Softgel with meal", why: "Vision, immunity, skin turnover", product: "Multivitamin (Adults)" },
+  { name: "Vitamin B1 (Thiamine HCl)", type: "Vitamin", sol: "Water", form: "Benfotiamine for nerves", delivery: "Tablet, with food", why: "Energy from carbohydrates", product: "Multivitamin (Adults)" },
+  { name: "Vitamin B2 (Riboflavin-5-phosphate)", type: "Vitamin", sol: "Water", form: "Activated R5P", delivery: "Tablet", why: "Mitochondrial energy", product: "Multivitamin (Adults)" },
+  { name: "Vitamin B3 (Niacinamide)", type: "Vitamin", sol: "Water", form: "Niacinamide (no flush)", delivery: "Tablet", why: "NAD+, skin barrier", product: "Multivitamin (Adults)" },
+  { name: "Vitamin B6 (P-5-P)", type: "Vitamin", sol: "Water", form: "Pyridoxal-5-phosphate", delivery: "Tablet", why: "Neurotransmitter synthesis", product: "Multivitamin (Adults)" },
+  { name: "Folate", type: "Vitamin", sol: "Water", form: "L-methylfolate (5-MTHF)", delivery: "Tablet", why: "DNA synthesis, methylation", product: "Multivitamin (Adults)" },
+  { name: "Vitamin B12", type: "Vitamin", sol: "Water", form: "Methylcobalamin", delivery: "Sublingual or tablet", why: "Nerve, blood, energy", product: "Multivitamin (Adults)" },
+  { name: "Vitamin C", type: "Vitamin", sol: "Water", form: "Liposomal ascorbate", delivery: "Powder or capsule", why: "Antioxidant, collagen, iron uptake", product: "Daily Greens Drink" },
+  { name: "Vitamin D3", type: "Vitamin", sol: "Fat", form: "Cholecalciferol + K2 MK-7", delivery: "Softgel with fat", why: "Bone, immunity, mood", product: "Vitamin D3 + K2 (MK-7)" },
+  { name: "Vitamin E", type: "Vitamin", sol: "Fat", form: "Mixed tocopherols + tocotrienols", delivery: "Softgel", why: "Lipid antioxidant", product: "Multivitamin (Adults)" },
+  { name: "Vitamin K2", type: "Vitamin", sol: "Fat", form: "Menaquinone-7 (MK-7)", delivery: "Softgel with D3", why: "Calcium routing to bone", product: "Vitamin D3 + K2 (MK-7)" },
+  { name: "Calcium", type: "Mineral", sol: "—", form: "Calcium citrate-malate", delivery: "Tablet, split dose", why: "Bone density, signaling", product: "Complete Daily Foundation" },
+  { name: "Magnesium", type: "Mineral", sol: "—", form: "Glycinate / L-threonate", delivery: "Capsule, evening", why: "300+ enzymes, sleep, muscle", product: "Sleep Support Melatonin" },
+  { name: "Iron", type: "Mineral", sol: "—", form: "Ferrous bisglycinate", delivery: "Tablet with vit C", why: "Oxygen transport", product: "Iron-Rich Ragi Powder" },
+  { name: "Zinc", type: "Mineral", sol: "—", form: "Zinc picolinate", delivery: "Tablet, away from iron/calcium", why: "Immunity, skin, hormones", product: "Multivitamin (Adults)" },
+  { name: "Selenium", type: "Mineral", sol: "—", form: "Selenomethionine", delivery: "Tablet", why: "Thyroid, glutathione", product: "Multivitamin (Adults)" },
+  { name: "Iodine", type: "Mineral", sol: "—", form: "Potassium iodide", delivery: "Tablet", why: "Thyroid hormone synthesis", product: "Multivitamin (Adults)" },
+  { name: "Omega-3 (EPA/DHA)", type: "Macro", sol: "Fat", form: "Algal triglyceride form", delivery: "Softgel with meal", why: "Heart, brain, inflammation", product: "Omega-3 Algal Softgel" },
+  { name: "Plant Protein", type: "Macro", sol: "—", form: "Pea + rice isolate (full PDCAAS)", delivery: "Powder", why: "Muscle protein synthesis", product: "High-Protein Dosa Premix" },
+  { name: "Fibre (Prebiotic)", type: "Macro", sol: "—", form: "Partially hydrolysed guar + acacia", delivery: "Powder, soluble", why: "Microbiome, satiety", product: "Daily Greens Drink" },
+  { name: "Creatine", type: "Bioactive", sol: "—", form: "Creatine monohydrate", delivery: "Powder, daily", why: "Strength, cognition", product: "Spirulina + Moringa Shake" },
+  { name: "Curcumin", type: "Bioactive", sol: "Fat", form: "With piperine or phytosomal", delivery: "Capsule with meal", why: "Anti-inflammatory", product: "Turmeric Latte Premix" },
+  { name: "Ashwagandha", type: "Bioactive", sol: "—", form: "KSM-66 root extract", delivery: "Capsule", why: "Stress adaptation, sleep", product: "Sleep Support Melatonin" },
+  { name: "Probiotics", type: "Bioactive", sol: "—", form: "Multi-strain, ≥10B CFU", delivery: "Capsule, refrigerated", why: "Gut, immunity", product: "Daily Greens Drink" },
+  { name: "CoQ10", type: "Bioactive", sol: "Fat", form: "Ubiquinol", delivery: "Softgel with fat", why: "Heart, mitochondria", product: "Omega-3 Algal Softgel" },
+  { name: "Choline", type: "Bioactive", sol: "Water", form: "Alpha-GPC", delivery: "Capsule", why: "Brain, liver, membranes", product: "Multivitamin (Adults)" },
+  { name: "Lutein + Zeaxanthin", type: "Bioactive", sol: "Fat", form: "FloraGLO 10:2", delivery: "Softgel", why: "Macular health, screens", product: "Multivitamin (Adults)" },
+  { name: "Collagen", type: "Bioactive", sol: "—", form: "Type I + III hydrolysate", delivery: "Powder", why: "Skin, joints, tendons", product: "Seed Butter Blend" },
 ];
 
 const typeColor: Record<Row["type"], string> = {
@@ -120,6 +129,7 @@ const Nutrients = () => {
                   <th className="text-left p-4 font-medium hidden md:table-cell">Best Form</th>
                   <th className="text-left p-4 font-medium hidden xl:table-cell">Delivery</th>
                   <th className="text-left p-4 font-medium">Why it matters</th>
+                  <th className="text-left p-4 font-medium">Find in shop</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,11 +143,21 @@ const Nutrients = () => {
                     <td className="p-4 hidden md:table-cell text-muted-foreground">{r.form}</td>
                     <td className="p-4 hidden xl:table-cell text-muted-foreground">{r.delivery}</td>
                     <td className="p-4 text-muted-foreground">{r.why}</td>
+                    <td className="p-4">
+                      <Link
+                        to={`/shop?q=${encodeURIComponent(r.product)}`}
+                        className="inline-flex items-center gap-1.5 px-3 h-8 rounded-full bg-leaf/15 text-forest text-xs font-semibold hover:bg-leaf/30 transition-colors group/link whitespace-nowrap"
+                        title={`Shop ${r.product}`}
+                      >
+                        <span className="max-w-[140px] truncate">{r.product}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
+                      </Link>
+                    </td>
                   </tr>
                 ))}
                 {list.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-muted-foreground">No matches. Try another keyword.</td>
+                    <td colSpan={7} className="p-8 text-center text-muted-foreground">No matches. Try another keyword.</td>
                   </tr>
                 )}
               </tbody>
