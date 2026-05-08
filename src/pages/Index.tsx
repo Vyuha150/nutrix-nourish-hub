@@ -7,7 +7,7 @@ import { CategoryStrip } from "@/components/nutrix/CategoryStrip";
 import { ProductShowcase } from "@/components/nutrix/ProductShowcase";
 import { Philosophy } from "@/components/nutrix/Philosophy";
 import { Products } from "@/components/nutrix/Products";
-import { Nutrients } from "@/components/nutrix/Nutrients";
+
 import { Science } from "@/components/nutrix/Science";
 import { Footer } from "@/components/nutrix/Footer";
 import { useEffect } from "react";
@@ -32,7 +32,7 @@ const Index = () => {
       <ProductShowcase />
       <Philosophy />
       <Products />
-      <Nutrients />
+      
       <Science />
       <Footer />
     </main>
