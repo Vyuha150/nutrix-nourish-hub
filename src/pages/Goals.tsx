@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
+import { GoalConsultDialog } from "@/components/nutrix/GoalConsultDialog";
 import { ArrowRight, Battery, Brain, Dumbbell, Moon, ShieldCheck, Sparkles, Heart, Leaf } from "lucide-react";
 import hero from "@/assets/hero-2.jpg";
 import imgEnergy from "@/assets/hero-3.jpg";
@@ -24,6 +25,7 @@ const goals = [
 ];
 
 const Goals = () => {
+  const [activeGoal, setActiveGoal] = useState<string | null>(null);
   useEffect(() => { document.title = "Shop by Goal · Nutrix"; }, []);
   return (
     <Layout>
@@ -73,10 +75,11 @@ const Goals = () => {
               const C = 2 * Math.PI * 22;
               const dash = (g.lift / 100) * C;
               return (
-                <a
-                  href="#"
+                <button
+                  type="button"
                   key={g.name}
-                  className="group relative rounded-3xl overflow-hidden border border-border bg-card shadow-soft hover:shadow-card hover:-translate-y-1 transition-all duration-500 animate-fade-up flex flex-col"
+                  onClick={() => setActiveGoal(g.name)}
+                  className="group relative rounded-3xl overflow-hidden border border-border bg-card shadow-soft hover:shadow-card hover:-translate-y-1 transition-all duration-500 animate-fade-up flex flex-col text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf"
                   style={{ animationDelay: `${i * 0.05}s` }}
                 >
                   {/* Image cover */}
@@ -150,7 +153,7 @@ const Goals = () => {
                       <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
-                </a>
+                </button>
               );
             })}
           </div>
