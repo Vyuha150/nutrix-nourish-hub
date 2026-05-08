@@ -175,6 +175,7 @@ const Goals = () => {
           ))}
         </div>
       </section>
+      <GoalConsultDialog goal={activeGoal} onClose={() => setActiveGoal(null)} />
     </Layout>
   );
 };
