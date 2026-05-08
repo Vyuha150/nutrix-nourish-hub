@@ -1,5 +1,10 @@
-import { Nav } from "@/components/nutrix/Nav";
-import { Hero } from "@/components/nutrix/Hero";
+import { PromoBar } from "@/components/nutrix/PromoBar";
+import { Header } from "@/components/nutrix/Header";
+import { SubNav } from "@/components/nutrix/SubNav";
+import { HeroCarousel } from "@/components/nutrix/HeroCarousel";
+import { PromoGrid } from "@/components/nutrix/PromoGrid";
+import { CategoryStrip } from "@/components/nutrix/CategoryStrip";
+import { ProductShowcase } from "@/components/nutrix/ProductShowcase";
 import { Philosophy } from "@/components/nutrix/Philosophy";
 import { Products } from "@/components/nutrix/Products";
 import { Nutrients } from "@/components/nutrix/Nutrients";
@@ -18,8 +23,13 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
-      <Hero />
+      <PromoBar />
+      <Header />
+      <SubNav />
+      <HeroCarousel />
+      <PromoGrid />
+      <CategoryStrip />
+      <ProductShowcase />
       <Philosophy />
       <Products />
       <Nutrients />
