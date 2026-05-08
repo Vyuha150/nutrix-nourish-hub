@@ -1,10 +1,17 @@
+import foundation from "@/assets/cat-foundation.jpg";
+import boosters from "@/assets/cat-boosters.jpg";
+import snacks from "@/assets/cat-snacks.jpg";
+import beverages from "@/assets/cat-beverages.jpg";
+import capsules from "@/assets/cat-capsules.jpg";
+import pastes from "@/assets/cat-pastes.jpg";
+
 const cats = [
-  { name: "Daily Foundation", count: 5 },
-  { name: "Meal Boosters", count: 7 },
-  { name: "Snacks", count: 7 },
-  { name: "Beverages", count: 4 },
-  { name: "Capsules", count: 5 },
-  { name: "Toppings", count: 5 },
+  { name: "Daily Foundation", count: 5, image: foundation },
+  { name: "Meal Boosters", count: 7, image: boosters },
+  { name: "Snacks", count: 7, image: snacks },
+  { name: "Beverages", count: 4, image: beverages },
+  { name: "Capsules", count: 5, image: capsules },
+  { name: "Toppings", count: 5, image: pastes },
 ];
 
 export const CategoryStrip = () => (
@@ -16,11 +23,18 @@ export const CategoryStrip = () => (
           <a
             key={c.name}
             href="#products"
-            className="group flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-dew/60 transition-colors animate-fade-up"
+            className="group flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-dew/60 transition-colors animate-fade-up"
             style={{ animationDelay: `${i * 0.06}s` }}
           >
-            <div className="w-16 h-16 rounded-full bg-gradient-leaf flex items-center justify-center shadow-soft group-hover:scale-110 group-hover:shadow-glow transition-all duration-500">
-              <span className="font-serif text-primary text-xl">{c.name[0]}</span>
+            <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-soft group-hover:shadow-glow group-hover:scale-105 transition-all duration-500 ring-2 ring-mist/60 group-hover:ring-leaf">
+              <img
+                src={c.image}
+                alt={c.name}
+                width={800}
+                height={800}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
             </div>
             <div className="text-center">
               <div className="text-xs font-semibold text-primary leading-tight">{c.name}</div>

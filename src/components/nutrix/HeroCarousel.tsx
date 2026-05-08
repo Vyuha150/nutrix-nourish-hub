@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Logo } from "./Logo";
+import hero1 from "@/assets/hero-1.jpg";
+import hero2 from "@/assets/hero-2.jpg";
+import hero3 from "@/assets/hero-3.jpg";
 
 const slides = [
   {
@@ -8,24 +10,21 @@ const slides = [
     title: "Daily Foundation",
     sub: "Stay consistent all spring long",
     cta: "Shop the system",
-    bg: "bg-gradient-forest",
-    accent: "text-leaf",
+    image: hero1,
   },
   {
     eyebrow: "Formulated to nourish",
     title: "Science you can feel.",
     sub: "Clinically dosed. Fully transparent.",
     cta: "Read the science",
-    bg: "bg-gradient-leaf",
-    accent: "text-primary",
+    image: hero2,
   },
   {
     eyebrow: "New · Meal Boosters",
     title: "Slot nutrition into food.",
     sub: "Zero behavior change. Maximum density.",
     cta: "Explore boosters",
-    bg: "bg-gradient-hero",
-    accent: "text-leaf",
+    image: hero3,
   },
 ];
 
@@ -45,48 +44,41 @@ export const HeroCarousel = () => {
         {slides.map((s, i) => (
           <div
             key={i}
-            className={`absolute inset-0 ${s.bg} transition-all duration-1000 ease-out ${
+            className={`absolute inset-0 transition-all duration-1000 ease-out ${
               i === idx ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
             }`}
           >
-            <div className="container-tight h-full grid md:grid-cols-12 items-center gap-10">
+            <img
+              src={s.image}
+              alt={s.title}
+              width={1600}
+              height={1024}
+              loading={i === 0 ? "eager" : "lazy"}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/60 to-primary/10" />
+            <div className="container-tight relative h-full grid md:grid-cols-12 items-center gap-10">
               <div className="md:col-span-7 z-10">
-                <div
-                  key={`eb-${idx}`}
-                  className={`label-eyebrow mb-5 ${s.accent} animate-fade-up`}
-                >
-                  {s.eyebrow}
-                </div>
+                <div className="label-eyebrow mb-5 text-leaf animate-fade-up">{s.eyebrow}</div>
                 <h1
-                  key={`t-${idx}`}
                   className="font-serif text-5xl md:text-7xl leading-[1.02] text-primary-foreground animate-fade-up"
                   style={{ animationDelay: "0.1s" }}
                 >
                   {s.title}
                 </h1>
                 <p
-                  key={`s-${idx}`}
-                  className="mt-6 text-lg md:text-xl text-primary-foreground/80 max-w-xl animate-fade-up"
+                  className="mt-6 text-lg md:text-xl text-primary-foreground/85 max-w-xl animate-fade-up"
                   style={{ animationDelay: "0.2s" }}
                 >
                   {s.sub}
                 </p>
                 <button
-                  key={`c-${idx}`}
                   className="mt-9 inline-flex items-center gap-2 bg-leaf hover:bg-dew text-primary font-semibold px-7 h-12 rounded-full shadow-glow transition-all hover:-translate-y-0.5 animate-fade-up"
                   style={{ animationDelay: "0.3s" }}
                 >
                   {s.cta}
                   <ChevronRight className="w-4 h-4" />
                 </button>
-              </div>
-              <div className="hidden md:flex md:col-span-5 justify-center">
-                <div className="relative animate-fade-up" style={{ animationDelay: "0.2s" }}>
-                  <div className="absolute -inset-12 bg-leaf/30 blur-3xl rounded-full animate-pulse-soft" />
-                  <div className="relative w-80 h-80 rounded-full bg-primary/30 backdrop-blur-sm border border-leaf/40 flex items-center justify-center">
-                    <Logo size={200} variant="dark" withWordmark={false} />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
