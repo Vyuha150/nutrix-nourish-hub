@@ -32,10 +32,40 @@ const products = [
 
 const Shop = () => {
   const [active, setActive] = useState("All");
+  const [params, setParams] = useSearchParams();
+  const initialQ = params.get("q") ?? "";
+  const [q, setQ] = useState(initialQ);
+  const highlightRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     document.title = "Shop by Product · Nutrix";
   }, []);
-  const list = active === "All" ? products : products.filter((p) => p.cat === active);
+
+  // Sync state when URL query changes (deep link from Nutrients page)
+  useEffect(() => {
+    const next = params.get("q") ?? "";
+    setQ(next);
+    if (next) {
+      // Auto-scroll to first matching product after render
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 250);
+    }
+  }, [params]);
+
+  const list = useMemo(() => {
+    const byCat = active === "All" ? products : products.filter((p) => p.cat === active);
+    if (!q.trim()) return byCat;
+    const needle = q.toLowerCase();
+    return byCat.filter((p) => p.name.toLowerCase().includes(needle) || p.cat.toLowerCase().includes(needle));
+  }, [active, q]);
+
+  const clearQuery = () => {
+    setQ("");
+    const next = new URLSearchParams(params);
+    next.delete("q");
+    setParams(next, { replace: true });
+  };
 
   return (
     <Layout>
@@ -47,6 +77,17 @@ const Shop = () => {
       />
       <section className="py-12 md:py-16 bg-background">
         <div className="container-tight">
+          {q && (
+            <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-leaf/30 bg-leaf/10 px-5 py-3 animate-fade-up">
+              <p className="text-sm text-forest">
+                Showing results for <span className="font-serif text-primary">"{q}"</span> — linked from the Nutrient Library.
+              </p>
+              <button onClick={clearQuery} className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary hover:text-forest">
+                <X className="w-3.5 h-3.5" /> Clear
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-3 mb-8 overflow-x-auto scrollbar-none">
             <Filter className="w-4 h-4 text-leaf shrink-0" />
             {categories.map((c) => (
@@ -64,39 +105,49 @@ const Shop = () => {
             ))}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {list.map((p, i) => (
-              <article
-                key={p.name}
-                className="group animate-fade-up"
-                style={{ animationDelay: `${i * 0.04}s` }}
-              >
-                <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
-                  <img src={p.img} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <button className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/85 backdrop-blur flex items-center justify-center hover:bg-background">
-                    <Heart className="w-4 h-4 text-primary" />
-                  </button>
-                  <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                    <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest">
-                      Add to cart
+            {list.map((p, i) => {
+              const isMatch = q.trim() && p.name.toLowerCase() === q.trim().toLowerCase();
+              return (
+                <article
+                  key={p.name}
+                  ref={isMatch && !highlightRef.current ? (el) => { highlightRef.current = el; } : undefined}
+                  className={`group animate-fade-up ${isMatch ? "ring-2 ring-leaf rounded-3xl p-2 -m-2 bg-leaf/5" : ""}`}
+                  style={{ animationDelay: `${i * 0.04}s` }}
+                >
+                  <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
+                    <img src={p.img} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <button className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/85 backdrop-blur flex items-center justify-center hover:bg-background">
+                      <Heart className="w-4 h-4 text-primary" />
                     </button>
+                    <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                      <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest">
+                        Add to cart
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="pt-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-leaf font-semibold">{p.cat}</p>
-                  <h3 className="font-serif text-base text-primary mt-1 leading-snug line-clamp-2 min-h-[40px]">{p.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{p.form}</p>
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
-                    <Star className="w-3 h-3 fill-leaf text-leaf" />
-                    <span className="text-primary font-medium">{p.rating}</span>
-                    <span>· {p.reviews}</span>
+                  <div className="pt-3">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-leaf font-semibold">{p.cat}</p>
+                    <h3 className="font-serif text-base text-primary mt-1 leading-snug line-clamp-2 min-h-[40px]">{p.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">{p.form}</p>
+                    <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+                      <Star className="w-3 h-3 fill-leaf text-leaf" />
+                      <span className="text-primary font-medium">{p.rating}</span>
+                      <span>· {p.reviews}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <span className="font-serif text-lg text-primary">₹{p.price}</span>
+                      <span className="text-xs text-muted-foreground line-through">₹{p.mrp}</span>
+                    </div>
                   </div>
-                  <div className="flex items-baseline gap-2 mt-1.5">
-                    <span className="font-serif text-lg text-primary">₹{p.price}</span>
-                    <span className="text-xs text-muted-foreground line-through">₹{p.mrp}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
+            {list.length === 0 && (
+              <div className="col-span-full p-12 text-center text-muted-foreground rounded-2xl border border-border bg-card">
+                <Search className="w-8 h-8 mx-auto mb-3 text-leaf" />
+                No products matched "{q}". Try clearing the filter.
+              </div>
+            )}
           </div>
         </div>
       </section>
