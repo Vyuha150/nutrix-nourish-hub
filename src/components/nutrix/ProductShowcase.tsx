@@ -1,6 +1,11 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Heart, Star } from "lucide-react";
-import { Logo } from "./Logo";
+import prodPowder from "@/assets/prod-powder.jpg";
+import prodTablet from "@/assets/prod-tablet.jpg";
+import prodSoftgel from "@/assets/prod-softgel.jpg";
+import prodJar from "@/assets/prod-jar.jpg";
+import prodBar from "@/assets/prod-bar.jpg";
+import prodButter from "@/assets/prod-butter.jpg";
 
 type Product = {
   name: string;
@@ -10,25 +15,26 @@ type Product = {
   mrp: number;
   reviews: number;
   badge?: "NEW" | "BEST" | "BUNDLE";
+  image: string;
   tone: "forest" | "leaf" | "mist" | "dew";
 };
 
 const bestSellers: Product[] = [
-  { name: "Complete Daily Foundation Powder", category: "Daily Foundation", form: "30-in-1 Powder · 300g", price: 1499, mrp: 1899, reviews: 218, badge: "BEST", tone: "forest" },
-  { name: "Vitamin D3 + K2 (MK-7)", category: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, reviews: 184, tone: "leaf" },
-  { name: "Omega-3 Algal Softgel", category: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, reviews: 142, tone: "mist" },
-  { name: "Spirulina + Moringa Shake", category: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, reviews: 96, badge: "BEST", tone: "dew" },
-  { name: "Multivitamin (Adults)", category: "Capsules & Tablets", form: "Tablet · 60ct", price: 549, mrp: 749, reviews: 167, tone: "forest" },
-  { name: "Zinc + Vitamin C Immunity", category: "Capsules & Tablets", form: "Tablet · 60ct", price: 349, mrp: 449, reviews: 121, tone: "leaf" },
+  { name: "Complete Daily Foundation Powder", category: "Daily Foundation", form: "30-in-1 Powder · 300g", price: 1499, mrp: 1899, reviews: 218, badge: "BEST", image: prodPowder, tone: "forest" },
+  { name: "Vitamin D3 + K2 (MK-7)", category: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, reviews: 184, image: prodTablet, tone: "leaf" },
+  { name: "Omega-3 Algal Softgel", category: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, reviews: 142, image: prodSoftgel, tone: "mist" },
+  { name: "Spirulina + Moringa Shake", category: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, reviews: 96, badge: "BEST", image: prodPowder, tone: "dew" },
+  { name: "Multivitamin (Adults)", category: "Capsules & Tablets", form: "Tablet · 60ct", price: 549, mrp: 749, reviews: 167, image: prodTablet, tone: "forest" },
+  { name: "Zinc + Vitamin C Immunity", category: "Capsules & Tablets", form: "Tablet · 60ct", price: 349, mrp: 449, reviews: 121, image: prodJar, tone: "leaf" },
 ];
 
 const newArrivals: Product[] = [
-  { name: "Iron-Rich Ragi Powder", category: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, reviews: 12, badge: "NEW", tone: "leaf" },
-  { name: "Seed Butter Blend", category: "Pastes & Toppings", form: "Jar · 250g", price: 549, mrp: 699, reviews: 8, badge: "NEW", tone: "mist" },
-  { name: "Daily Greens Drink", category: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, reviews: 21, badge: "NEW", tone: "forest" },
-  { name: "Sleep Support Melatonin", category: "Capsules & Tablets", form: "Softgel · 60ct", price: 499, mrp: 649, reviews: 17, badge: "NEW", tone: "dew" },
-  { name: "Protein Lassi Powder", category: "Beverages", form: "Powder · 400g", price: 799, mrp: 999, reviews: 9, badge: "NEW", tone: "leaf" },
-  { name: "Fortified Chikki Bar", category: "Snacks", form: "Pack of 12", price: 599, mrp: 749, reviews: 14, badge: "NEW", tone: "forest" },
+  { name: "Iron-Rich Ragi Powder", category: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, reviews: 12, badge: "NEW", image: prodPowder, tone: "leaf" },
+  { name: "Seed Butter Blend", category: "Pastes & Toppings", form: "Jar · 250g", price: 549, mrp: 699, reviews: 8, badge: "NEW", image: prodButter, tone: "mist" },
+  { name: "Daily Greens Drink", category: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, reviews: 21, badge: "NEW", image: prodPowder, tone: "forest" },
+  { name: "Sleep Support Melatonin", category: "Capsules & Tablets", form: "Softgel · 60ct", price: 499, mrp: 649, reviews: 17, badge: "NEW", image: prodSoftgel, tone: "dew" },
+  { name: "Protein Lassi Powder", category: "Beverages", form: "Powder · 400g", price: 799, mrp: 999, reviews: 9, badge: "NEW", image: prodJar, tone: "leaf" },
+  { name: "Fortified Chikki Bar", category: "Snacks", form: "Pack of 12", price: 599, mrp: 749, reviews: 14, badge: "NEW", image: prodBar, tone: "forest" },
 ];
 
 const toneStyles: Record<Product["tone"], string> = {
@@ -51,12 +57,15 @@ const ProductCard = ({ p }: { p: Product }) => {
         <button className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center hover:bg-background transition-colors">
           <Heart className="w-4 h-4 text-primary" />
         </button>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-3">
-            <div className="absolute -inset-8 bg-leaf/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Logo size={120} variant={p.tone === "forest" || p.tone === "leaf" ? "dark" : "light"} withWordmark={false} />
-          </div>
-        </div>
+        <img
+          src={p.image}
+          alt={p.name}
+          width={1024}
+          height={1024}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="absolute bottom-0 inset-x-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
           <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors">
             Add to cart
