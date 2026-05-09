@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
-import bundleImg from "@/assets/cat-foundation.jpg";
-import circleImg from "@/assets/cat-beverages.jpg";
+import bundleImg from "@/assets/promo-powder.jpg";
+import circleImg from "@/assets/promo-sachet.jpg";
 import authImg from "@/assets/cat-capsules.jpg";
 
 const promos = [
