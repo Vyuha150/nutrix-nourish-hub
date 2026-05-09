@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Logo } from "./Logo";
+import { AnimatedLogo } from "./AnimatedLogo";
 
 export const Hero = () => (
   <section id="top" className="relative overflow-hidden bg-gradient-hero">
@@ -40,7 +40,7 @@ export const Hero = () => (
           <div className="relative">
             <div className="absolute -inset-10 bg-leaf/20 blur-3xl rounded-full animate-pulse-soft" />
             <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full bg-gradient-forest flex items-center justify-center shadow-glow">
-              <Logo size={220} variant="dark" withWordmark={false} />
+              <AnimatedLogo size={220} variant="dark" />
             </div>
           </div>
         </div>
