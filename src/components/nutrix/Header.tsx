@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Logo } from "./Logo";
-import { Search, Heart, ShoppingBag, User, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Trash2, Plus, Minus, ArrowRight, LayoutDashboard } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -113,6 +113,15 @@ export const Header = () => {
             </div>
           </div>
           <div className="col-span-3 flex items-center justify-end gap-5">
+            <a
+              href="/admin"
+              aria-label="Admin panel"
+              title="Admin panel"
+              className="relative group inline-flex items-center gap-1.5 px-2.5 h-8 rounded-full bg-leaf/15 hover:bg-leaf/25 text-primary-foreground transition-colors"
+            >
+              <LayoutDashboard className="w-4 h-4 transition-transform group-hover:scale-110" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider hidden lg:inline">Admin</span>
+            </a>
             {buttons.map(({ label, Icon, onClick, badge }) => (
               <button
                 key={label}
