@@ -11,6 +11,13 @@ import Science from "./pages/Science.tsx";
 import LabReports from "./pages/LabReports.tsx";
 import Offers from "./pages/Offers.tsx";
 import StackFinder from "./pages/StackFinder.tsx";
+import AdminDashboard from "./pages/admin/Dashboard.tsx";
+import AdminAnalytics from "./pages/admin/Analytics.tsx";
+import AdminProducts from "./pages/admin/Products.tsx";
+import AdminOrders from "./pages/admin/Orders.tsx";
+import AdminCustomers from "./pages/admin/Customers.tsx";
+import AdminContent from "./pages/admin/Content.tsx";
+import AdminMarketing from "./pages/admin/Marketing.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -30,6 +37,13 @@ const App = () => (
           <Route path="/lab-reports" element={<LabReports />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/stack-finder" element={<StackFinder />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/customers" element={<AdminCustomers />} />
+          <Route path="/admin/content" element={<AdminContent />} />
+          <Route path="/admin/marketing" element={<AdminMarketing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
