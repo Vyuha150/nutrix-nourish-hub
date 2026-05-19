@@ -14,24 +14,35 @@ import prodButter from "@/assets/prod-butter.jpg";
 const categories = ["All", "Daily Foundation", "Meal Boosters", "Snacks", "Beverages", "Capsules", "Toppings"];
 
 const products = [
-  { name: "Complete Daily Foundation", cat: "Daily Foundation", form: "Powder · 300g", price: 1499, mrp: 1899, img: prodPowder, rating: 4.8, reviews: 218 },
-  { name: "Vitamin D3 + K2 (MK-7)", cat: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, img: prodTablet, rating: 4.7, reviews: 184 },
-  { name: "Omega-3 Algal Softgel", cat: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, img: prodSoftgel, rating: 4.9, reviews: 142 },
-  { name: "Spirulina + Moringa Shake", cat: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, img: prodPowder, rating: 4.6, reviews: 96 },
-  { name: "Iron-Rich Ragi Powder", cat: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, img: prodPowder, rating: 4.5, reviews: 64 },
-  { name: "High-Protein Dosa Premix", cat: "Meal Boosters", form: "Pouch · 500g", price: 349, mrp: 449, img: prodJar, rating: 4.4, reviews: 41 },
-  { name: "Fortified Chikki Bar", cat: "Snacks", form: "Pack of 12", price: 599, mrp: 749, img: prodBar, rating: 4.7, reviews: 88 },
-  { name: "Roasted Seed Trail Mix", cat: "Snacks", form: "Pouch · 200g", price: 299, mrp: 399, img: prodBar, rating: 4.6, reviews: 53 },
-  { name: "Daily Greens Drink", cat: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, img: prodPowder, rating: 4.8, reviews: 71 },
-  { name: "Turmeric Latte Premix", cat: "Beverages", form: "Powder · 150g", price: 449, mrp: 549, img: prodJar, rating: 4.5, reviews: 38 },
-  { name: "Multivitamin (Adults)", cat: "Capsules", form: "Tablet · 60ct", price: 549, mrp: 749, img: prodTablet, rating: 4.7, reviews: 167 },
-  { name: "Sleep Support Melatonin", cat: "Capsules", form: "Softgel · 60ct", price: 499, mrp: 649, img: prodSoftgel, rating: 4.6, reviews: 92 },
-  { name: "Seed Butter Blend", cat: "Toppings", form: "Jar · 250g", price: 549, mrp: 699, img: prodButter, rating: 4.8, reviews: 47 },
-  { name: "Nutritional Yeast Sprinkle", cat: "Toppings", form: "Shaker · 100g", price: 299, mrp: 379, img: prodJar, rating: 4.5, reviews: 31 },
+  { name: "Complete Daily Foundation", cat: "Daily Foundation", form: "Powder · 300g", price: 1499, mrp: 1899, img: prodPowder, rating: 4.8, reviews: 218, bestTime: "Morning" },
+  { name: "Vitamin D3 + K2 (MK-7)", cat: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, img: prodTablet, rating: 4.7, reviews: 184, bestTime: "Morning" },
+  { name: "Omega-3 Algal Softgel", cat: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, img: prodSoftgel, rating: 4.9, reviews: 142, bestTime: "Evening" },
+  { name: "Spirulina + Moringa Shake", cat: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, img: prodPowder, rating: 4.6, reviews: 96, bestTime: "Morning" },
+  { name: "Iron-Rich Ragi Powder", cat: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, img: prodPowder, rating: 4.5, reviews: 64, bestTime: "Afternoon" },
+  { name: "High-Protein Dosa Premix", cat: "Meal Boosters", form: "Pouch · 500g", price: 349, mrp: 449, img: prodJar, rating: 4.4, reviews: 41, bestTime: "Morning" },
+  { name: "Fortified Chikki Bar", cat: "Snacks", form: "Pack of 12", price: 599, mrp: 749, img: prodBar, rating: 4.7, reviews: 88, bestTime: "Afternoon" },
+  { name: "Roasted Seed Trail Mix", cat: "Snacks", form: "Pouch · 200g", price: 299, mrp: 399, img: prodBar, rating: 4.6, reviews: 53, bestTime: "Anytime" },
+  { name: "Daily Greens Drink", cat: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, img: prodPowder, rating: 4.8, reviews: 71, bestTime: "Morning" },
+  { name: "Turmeric Latte Premix", cat: "Beverages", form: "Powder · 150g", price: 449, mrp: 549, img: prodJar, rating: 4.5, reviews: 38, bestTime: "Night" },
+  { name: "Multivitamin (Adults)", cat: "Capsules", form: "Tablet · 60ct", price: 549, mrp: 749, img: prodTablet, rating: 4.7, reviews: 167, bestTime: "Morning" },
+  { name: "Sleep Support Melatonin", cat: "Capsules", form: "Softgel · 60ct", price: 499, mrp: 649, img: prodSoftgel, rating: 4.6, reviews: 92, bestTime: "Night" },
+  { name: "Seed Butter Blend", cat: "Toppings", form: "Jar · 250g", price: 549, mrp: 699, img: prodButter, rating: 4.8, reviews: 47, bestTime: "Anytime" },
+  { name: "Nutritional Yeast Sprinkle", cat: "Toppings", form: "Shaker · 100g", price: 299, mrp: 379, img: prodJar, rating: 4.5, reviews: 31, bestTime: "Anytime" },
 ];
+
+const timeStyles: Record<string, { cls: string; icon: string }> = {
+  Morning: { cls: "text-amber-700 bg-amber-50 border-amber-200", icon: "☀️" },
+  Afternoon: { cls: "text-orange-700 bg-orange-50 border-orange-200", icon: "🌤️" },
+  Evening: { cls: "text-rose-700 bg-rose-50 border-rose-200", icon: "🌆" },
+  Night: { cls: "text-indigo-700 bg-indigo-50 border-indigo-200", icon: "🌙" },
+  Anytime: { cls: "text-emerald-700 bg-emerald-50 border-emerald-200", icon: "⏱️" },
+};
+
+const timeFilters = ["All times", "Morning", "Afternoon", "Evening", "Night", "Anytime"];
 
 const Shop = () => {
   const [active, setActive] = useState("All");
+  const [activeTime, setActiveTime] = useState("All times");
   const [params, setParams] = useSearchParams();
   const initialQ = params.get("q") ?? "";
   const [q, setQ] = useState(initialQ);
@@ -54,11 +65,12 @@ const Shop = () => {
   }, [params]);
 
   const list = useMemo(() => {
-    const byCat = active === "All" ? products : products.filter((p) => p.cat === active);
-    if (!q.trim()) return byCat;
+    let res = active === "All" ? products : products.filter((p) => p.cat === active);
+    if (activeTime !== "All times") res = res.filter((p) => p.bestTime === activeTime);
+    if (!q.trim()) return res;
     const needle = q.toLowerCase();
-    return byCat.filter((p) => p.name.toLowerCase().includes(needle) || p.cat.toLowerCase().includes(needle));
-  }, [active, q]);
+    return res.filter((p) => p.name.toLowerCase().includes(needle) || p.cat.toLowerCase().includes(needle));
+  }, [active, activeTime, q]);
 
   const clearQuery = () => {
     setQ("");
@@ -88,7 +100,7 @@ const Shop = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-3 mb-8 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-3 mb-4 overflow-x-auto scrollbar-none">
             <Filter className="w-4 h-4 text-leaf shrink-0" />
             {categories.map((c) => (
               <button
@@ -104,6 +116,30 @@ const Shop = () => {
               </button>
             ))}
           </div>
+          <div className="flex items-center gap-3 mb-8 overflow-x-auto scrollbar-none">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-leaf font-semibold shrink-0">Best time</span>
+            {timeFilters.map((t) => {
+              const sel = activeTime === t;
+              const style = t !== "All times" ? timeStyles[t] : undefined;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setActiveTime(t)}
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium border transition-all ${
+                    sel
+                      ? "bg-primary text-primary-foreground border-primary shadow-soft"
+                      : style
+                        ? `${style.cls} hover:opacity-80`
+                        : "bg-dew text-primary border-mist hover:bg-mist"
+                  }`}
+                >
+                  {style && <span aria-hidden>{style.icon}</span>}
+                  {t}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {list.map((p, i) => {
               const isMatch = q.trim() && p.name.toLowerCase() === q.trim().toLowerCase();
@@ -116,6 +152,9 @@ const Shop = () => {
                 >
                   <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
                     <img src={p.img} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <span className={`absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full border backdrop-blur-sm ${timeStyles[p.bestTime].cls}`}>
+                      <span aria-hidden>{timeStyles[p.bestTime].icon}</span> {p.bestTime}
+                    </span>
                     <button className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/85 backdrop-blur flex items-center justify-center hover:bg-background">
                       <Heart className="w-4 h-4 text-primary" />
                     </button>
