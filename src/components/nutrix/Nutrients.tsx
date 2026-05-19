@@ -1,9 +1,11 @@
+type BestTime = "Morning" | "Afternoon" | "Evening" | "Night" | "Anytime";
 type Row = {
   name: string;
   type: "Vitamin" | "Mineral" | "Macro" | "Other";
   solubility: "Fat" | "Water" | "—";
   bestForm: string;
   delivery: string;
+  bestTime: BestTime;
   why: string;
 };
 
