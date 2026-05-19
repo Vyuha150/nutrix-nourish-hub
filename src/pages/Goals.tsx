@@ -51,25 +51,6 @@ const Goals = () => {
         <div className="absolute -bottom-24 left-10 w-80 h-80 rounded-full bg-mist/40 blur-3xl animate-pulse-soft pointer-events-none" />
 
         <div className="container-tight relative">
-          {/* Stat band */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-            {[
-              ["8", "Outcome stacks"],
-              ["48", "Clinical actives"],
-              ["100%", "Open CoA"],
-              ["14d", "First results"],
-            ].map(([n, l], i) => (
-              <div
-                key={l}
-                className="relative rounded-2xl bg-card border border-border p-5 shadow-soft animate-fade-up overflow-hidden group"
-                style={{ animationDelay: `${i * 0.06}s` }}
-              >
-                <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-gradient-leaf opacity-15 group-hover:scale-150 group-hover:opacity-30 transition-all duration-700" />
-                <div className="relative font-serif text-3xl text-primary">{n}</div>
-                <div className="relative text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{l}</div>
-              </div>
-            ))}
-          </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {goals.map((g, i) => {
