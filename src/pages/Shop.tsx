@@ -65,11 +65,12 @@ const Shop = () => {
   }, [params]);
 
   const list = useMemo(() => {
-    const byCat = active === "All" ? products : products.filter((p) => p.cat === active);
-    if (!q.trim()) return byCat;
+    let res = active === "All" ? products : products.filter((p) => p.cat === active);
+    if (activeTime !== "All times") res = res.filter((p) => p.bestTime === activeTime);
+    if (!q.trim()) return res;
     const needle = q.toLowerCase();
-    return byCat.filter((p) => p.name.toLowerCase().includes(needle) || p.cat.toLowerCase().includes(needle));
-  }, [active, q]);
+    return res.filter((p) => p.name.toLowerCase().includes(needle) || p.cat.toLowerCase().includes(needle));
+  }, [active, activeTime, q]);
 
   const clearQuery = () => {
     setQ("");
