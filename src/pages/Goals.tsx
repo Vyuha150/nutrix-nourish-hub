@@ -29,12 +29,13 @@ const Goals = () => {
   useEffect(() => { document.title = "Shop by Goal · Nutrix"; }, []);
   return (
     <Layout>
-      <PageHero
-        eyebrow="Outcome-led nutrition"
-        title={<>Pick a goal. <em className="font-light">We'll formulate the rest.</em></>}
-        sub="Eight clinically-grounded outcome stacks. Built from the same transparent actives — sequenced for the result you actually want."
-        image={hero}
-      />
+      <section className="bg-background pt-10 md:pt-14 pb-2">
+        <div className="container-tight">
+          <h1 className="font-serif text-3xl md:text-5xl text-primary leading-tight">
+            Pick a goal. <em className="font-light">We'll formulate the rest.</em>
+          </h1>
+        </div>
+      </section>
 
       <section className="relative py-16 md:py-24 bg-background overflow-hidden">
         {/* futuristic backdrop */}
