@@ -42,6 +42,7 @@ const timeFilters = ["All times", "Morning", "Afternoon", "Evening", "Night", "A
 
 const Shop = () => {
   const [active, setActive] = useState("All");
+  const [activeTime, setActiveTime] = useState("All times");
   const [params, setParams] = useSearchParams();
   const initialQ = params.get("q") ?? "";
   const [q, setQ] = useState(initialQ);
