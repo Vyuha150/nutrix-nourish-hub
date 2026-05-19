@@ -152,6 +152,9 @@ const Shop = () => {
                 >
                   <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
                     <img src={p.img} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <span className={`absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full border backdrop-blur-sm ${timeStyles[p.bestTime].cls}`}>
+                      <span aria-hidden>{timeStyles[p.bestTime].icon}</span> {p.bestTime}
+                    </span>
                     <button className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/85 backdrop-blur flex items-center justify-center hover:bg-background">
                       <Heart className="w-4 h-4 text-primary" />
                     </button>
