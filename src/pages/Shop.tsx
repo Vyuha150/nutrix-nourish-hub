@@ -14,21 +14,31 @@ import prodButter from "@/assets/prod-butter.jpg";
 const categories = ["All", "Daily Foundation", "Meal Boosters", "Snacks", "Beverages", "Capsules", "Toppings"];
 
 const products = [
-  { name: "Complete Daily Foundation", cat: "Daily Foundation", form: "Powder · 300g", price: 1499, mrp: 1899, img: prodPowder, rating: 4.8, reviews: 218 },
-  { name: "Vitamin D3 + K2 (MK-7)", cat: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, img: prodTablet, rating: 4.7, reviews: 184 },
-  { name: "Omega-3 Algal Softgel", cat: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, img: prodSoftgel, rating: 4.9, reviews: 142 },
-  { name: "Spirulina + Moringa Shake", cat: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, img: prodPowder, rating: 4.6, reviews: 96 },
-  { name: "Iron-Rich Ragi Powder", cat: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, img: prodPowder, rating: 4.5, reviews: 64 },
-  { name: "High-Protein Dosa Premix", cat: "Meal Boosters", form: "Pouch · 500g", price: 349, mrp: 449, img: prodJar, rating: 4.4, reviews: 41 },
-  { name: "Fortified Chikki Bar", cat: "Snacks", form: "Pack of 12", price: 599, mrp: 749, img: prodBar, rating: 4.7, reviews: 88 },
-  { name: "Roasted Seed Trail Mix", cat: "Snacks", form: "Pouch · 200g", price: 299, mrp: 399, img: prodBar, rating: 4.6, reviews: 53 },
-  { name: "Daily Greens Drink", cat: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, img: prodPowder, rating: 4.8, reviews: 71 },
-  { name: "Turmeric Latte Premix", cat: "Beverages", form: "Powder · 150g", price: 449, mrp: 549, img: prodJar, rating: 4.5, reviews: 38 },
-  { name: "Multivitamin (Adults)", cat: "Capsules", form: "Tablet · 60ct", price: 549, mrp: 749, img: prodTablet, rating: 4.7, reviews: 167 },
-  { name: "Sleep Support Melatonin", cat: "Capsules", form: "Softgel · 60ct", price: 499, mrp: 649, img: prodSoftgel, rating: 4.6, reviews: 92 },
-  { name: "Seed Butter Blend", cat: "Toppings", form: "Jar · 250g", price: 549, mrp: 699, img: prodButter, rating: 4.8, reviews: 47 },
-  { name: "Nutritional Yeast Sprinkle", cat: "Toppings", form: "Shaker · 100g", price: 299, mrp: 379, img: prodJar, rating: 4.5, reviews: 31 },
+  { name: "Complete Daily Foundation", cat: "Daily Foundation", form: "Powder · 300g", price: 1499, mrp: 1899, img: prodPowder, rating: 4.8, reviews: 218, bestTime: "Morning" },
+  { name: "Vitamin D3 + K2 (MK-7)", cat: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, img: prodTablet, rating: 4.7, reviews: 184, bestTime: "Morning" },
+  { name: "Omega-3 Algal Softgel", cat: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, img: prodSoftgel, rating: 4.9, reviews: 142, bestTime: "Evening" },
+  { name: "Spirulina + Moringa Shake", cat: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, img: prodPowder, rating: 4.6, reviews: 96, bestTime: "Morning" },
+  { name: "Iron-Rich Ragi Powder", cat: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, img: prodPowder, rating: 4.5, reviews: 64, bestTime: "Afternoon" },
+  { name: "High-Protein Dosa Premix", cat: "Meal Boosters", form: "Pouch · 500g", price: 349, mrp: 449, img: prodJar, rating: 4.4, reviews: 41, bestTime: "Morning" },
+  { name: "Fortified Chikki Bar", cat: "Snacks", form: "Pack of 12", price: 599, mrp: 749, img: prodBar, rating: 4.7, reviews: 88, bestTime: "Afternoon" },
+  { name: "Roasted Seed Trail Mix", cat: "Snacks", form: "Pouch · 200g", price: 299, mrp: 399, img: prodBar, rating: 4.6, reviews: 53, bestTime: "Anytime" },
+  { name: "Daily Greens Drink", cat: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, img: prodPowder, rating: 4.8, reviews: 71, bestTime: "Morning" },
+  { name: "Turmeric Latte Premix", cat: "Beverages", form: "Powder · 150g", price: 449, mrp: 549, img: prodJar, rating: 4.5, reviews: 38, bestTime: "Night" },
+  { name: "Multivitamin (Adults)", cat: "Capsules", form: "Tablet · 60ct", price: 549, mrp: 749, img: prodTablet, rating: 4.7, reviews: 167, bestTime: "Morning" },
+  { name: "Sleep Support Melatonin", cat: "Capsules", form: "Softgel · 60ct", price: 499, mrp: 649, img: prodSoftgel, rating: 4.6, reviews: 92, bestTime: "Night" },
+  { name: "Seed Butter Blend", cat: "Toppings", form: "Jar · 250g", price: 549, mrp: 699, img: prodButter, rating: 4.8, reviews: 47, bestTime: "Anytime" },
+  { name: "Nutritional Yeast Sprinkle", cat: "Toppings", form: "Shaker · 100g", price: 299, mrp: 379, img: prodJar, rating: 4.5, reviews: 31, bestTime: "Anytime" },
 ];
+
+const timeStyles: Record<string, { cls: string; icon: string }> = {
+  Morning: { cls: "text-amber-700 bg-amber-50 border-amber-200", icon: "☀️" },
+  Afternoon: { cls: "text-orange-700 bg-orange-50 border-orange-200", icon: "🌤️" },
+  Evening: { cls: "text-rose-700 bg-rose-50 border-rose-200", icon: "🌆" },
+  Night: { cls: "text-indigo-700 bg-indigo-50 border-indigo-200", icon: "🌙" },
+  Anytime: { cls: "text-emerald-700 bg-emerald-50 border-emerald-200", icon: "⏱️" },
+};
+
+const timeFilters = ["All times", "Morning", "Afternoon", "Evening", "Night", "Anytime"];
 
 const Shop = () => {
   const [active, setActive] = useState("All");
