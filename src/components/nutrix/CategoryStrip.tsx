@@ -43,6 +43,27 @@ export const CategoryStrip = () => (
           </a>
         ))}
       </div>
+
+      <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        {[
+          { to: "/offers", label: "Hot offers" },
+          { to: "/goals", label: "Shop by goal" },
+        ].map((b, i) => (
+          <a
+            key={b.to}
+            href={b.to}
+            className="group relative inline-flex items-center justify-center px-8 h-12 rounded-full text-xs font-semibold uppercase tracking-[0.18em] text-primary overflow-hidden isolate animate-fade-up"
+            style={{ animationDelay: `${0.4 + i * 0.08}s` }}
+          >
+            <span className="absolute inset-0 rounded-full bg-leaf/10 backdrop-blur-sm mix-blend-multiply transition-all duration-700 group-hover:bg-leaf/30 group-hover:scale-110" />
+            <span className="absolute inset-0 rounded-full ring-1 ring-leaf/40 group-hover:ring-leaf transition-all duration-500" />
+            <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-leaf/0 via-leaf/40 to-leaf/0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <span className="relative z-10 transition-all duration-500 group-hover:tracking-[0.22em]">
+              {b.label}
+            </span>
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 );
