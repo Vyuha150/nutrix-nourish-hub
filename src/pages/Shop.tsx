@@ -100,7 +100,7 @@ const Shop = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-3 mb-8 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-3 mb-4 overflow-x-auto scrollbar-none">
             <Filter className="w-4 h-4 text-leaf shrink-0" />
             {categories.map((c) => (
               <button
@@ -116,6 +116,30 @@ const Shop = () => {
               </button>
             ))}
           </div>
+          <div className="flex items-center gap-3 mb-8 overflow-x-auto scrollbar-none">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-leaf font-semibold shrink-0">Best time</span>
+            {timeFilters.map((t) => {
+              const sel = activeTime === t;
+              const style = t !== "All times" ? timeStyles[t] : undefined;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setActiveTime(t)}
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium border transition-all ${
+                    sel
+                      ? "bg-primary text-primary-foreground border-primary shadow-soft"
+                      : style
+                        ? `${style.cls} hover:opacity-80`
+                        : "bg-dew text-primary border-mist hover:bg-mist"
+                  }`}
+                >
+                  {style && <span aria-hidden>{style.icon}</span>}
+                  {t}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {list.map((p, i) => {
               const isMatch = q.trim() && p.name.toLowerCase() === q.trim().toLowerCase();
