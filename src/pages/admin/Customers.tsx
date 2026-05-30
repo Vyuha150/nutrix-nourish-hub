@@ -8,23 +8,39 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, Eye, Mail } from "lucide-react";
-import { customers, orders, AdminCustomer, inr } from "@/lib/adminMockData";
+import { inr } from "@/lib/format";
+import { getCustomers, getOrders } from "@/lib/api";
+import type { CustomerStats, OrderRecord } from "@/lib/types";
 
-const segVariant: Record<AdminCustomer["segment"], "default" | "secondary" | "outline" | "destructive"> = {
+const segVariant: Record<CustomerStats["segment"], "default" | "secondary" | "outline" | "destructive"> = {
   VIP: "default", Regular: "secondary", New: "outline", "At-risk": "destructive",
 };
 
 const Customers = () => {
   useEffect(() => { document.title = "Customers · Nutrix Admin"; }, []);
   const [q, setQ] = useState("");
-  const [view, setView] = useState<AdminCustomer | null>(null);
+  const [view, setView] = useState<CustomerStats | null>(null);
+  const [customers, setCustomers] = useState<CustomerStats[]>([]);
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [c, o] = await Promise.all([getCustomers(), getOrders()]);
+        setCustomers(c);
+        setOrders(o);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
 
   const filtered = useMemo(() => {
     const n = q.toLowerCase().trim();
     return n ? customers.filter((c) => c.name.toLowerCase().includes(n) || c.email.toLowerCase().includes(n)) : customers;
-  }, [q]);
+  }, [q, customers]);
 
-  const totalLtv = customers.reduce((s, c) => s + c.ltv, 0);
+  const totalLtv = customers.reduce((s, c) => s + (c.ltv || 0), 0);
   const vip = customers.filter((c) => c.segment === "VIP").length;
   const atRisk = customers.filter((c) => c.segment === "At-risk").length;
 

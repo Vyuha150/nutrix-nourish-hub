@@ -10,34 +10,59 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { promos as seed, AdminPromo } from "@/lib/adminMockData";
+import type { PromoRecord } from "@/lib/types";
+import { getPromos, createPromo, updatePromo, deletePromo, getSiteConfig, updateSiteConfig } from "@/lib/api";
 import { toast } from "sonner";
 
-const empty: AdminPromo = { id: "", code: "", description: "", discount: "", used: 0, cap: 1000, expires: "", active: true };
+const empty: PromoRecord = { id: "", code: "", description: "", discount: "", used: 0, cap: 1000, expires: "", active: true };
 
 const Marketing = () => {
   useEffect(() => { document.title = "Marketing · Nutrix Admin"; }, []);
-  const [items, setItems] = useState<AdminPromo[]>(seed);
-  const [promoBar, setPromoBar] = useState("Free shipping above ₹999 · Use code WELCOME10 for 10% off");
-  const [heroHeadline, setHeroHeadline] = useState("Formulated to nourish.");
-  const [editing, setEditing] = useState<AdminPromo | null>(null);
+  const [items, setItems] = useState<any[]>([]);
+  const [promoBar, setPromoBar] = useState("");
+  const [heroHeadline, setHeroHeadline] = useState("");
+  const [editing, setEditing] = useState<PromoRecord | null>(null);
   const [open, setOpen] = useState(false);
 
-  const onSave = (p: AdminPromo) => {
-    if (!p.code.trim()) { toast.error("Code required"); return; }
-    if (editing && items.find((i) => i.id === editing.id)) {
-      setItems(items.map((i) => (i.id === editing.id ? p : i)));
-      toast.success("Promo updated");
-    } else {
-      const id = `PR-${(items.length + 1).toString().padStart(2, "0")}`;
-      setItems([{ ...p, id }, ...items]);
-      toast.success("Promo created");
+  const onSave = async (p: any) => {
+    try {
+      if (!p.code.trim()) { toast.error("Code required"); return; }
+      if (p.id) {
+        const updated = await updatePromo(p.id, p);
+        setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+        toast.success("Promo updated");
+      } else {
+        const created = await createPromo(p);
+        setItems((prev) => [created, ...prev]);
+        toast.success("Promo created");
+      }
+      setOpen(false); setEditing(null);
+    } catch (err: any) {
+      toast.error(err.message || String(err));
     }
-    setOpen(false); setEditing(null);
   };
 
-  const toggle = (id: string) => setItems(items.map((p) => (p.id === id ? { ...p, active: !p.active } : p)));
-  const remove = (p: AdminPromo) => { setItems(items.filter((i) => i.id !== p.id)); toast.success(`Removed ${p.code}`); };
+  const toggle = async (id: string) => {
+    try {
+      const current = items.find((i) => i.id === id);
+      const updated = await updatePromo(id, { active: !current.active });
+      setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
+    } catch (err: any) { console.error(err); }
+  };
+  const remove = async (p: any) => { try { await deletePromo(p.id); setItems((prev) => prev.filter((i) => i.id !== p.id)); toast.success(`Removed ${p.code}`); } catch (err: any) { toast.error(err.message || String(err)); } };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [promos, siteConfig] = await Promise.all([getPromos(), getSiteConfig()]);
+        setItems(promos || []);
+        setPromoBar(siteConfig?.promoBar || "");
+        setHeroHeadline(siteConfig?.heroHeadline || "");
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
 
   return (
     <AdminLayout title="Marketing" description="Promo bar, hero, and discount codes">
@@ -47,7 +72,7 @@ const Marketing = () => {
           <CardContent className="space-y-3">
             <div className="space-y-1.5"><Label>Message</Label><Input value={promoBar} onChange={(e) => setPromoBar(e.target.value)} /></div>
             <div className="rounded-md bg-primary text-primary-foreground text-xs text-center py-2">{promoBar}</div>
-            <Button size="sm" onClick={() => toast.success("Promo bar updated")}>Save changes</Button>
+            <Button size="sm" onClick={async () => { try { await updateSiteConfig({ promoBar }); toast.success('Promo bar updated'); } catch (err:any){ toast.error(err.message||String(err)) } }}>Save changes</Button>
           </CardContent>
         </Card>
         <Card>
@@ -55,7 +80,7 @@ const Marketing = () => {
           <CardContent className="space-y-3">
             <div className="space-y-1.5"><Label>Headline</Label><Input value={heroHeadline} onChange={(e) => setHeroHeadline(e.target.value)} /></div>
             <p className="text-2xl font-serif text-primary">{heroHeadline}</p>
-            <Button size="sm" onClick={() => toast.success("Hero updated")}>Save changes</Button>
+            <Button size="sm" onClick={async () => { try { await updateSiteConfig({ heroHeadline }); toast.success('Hero updated'); } catch (err:any){ toast.error(err.message||String(err)) } }}>Save changes</Button>
           </CardContent>
         </Card>
       </div>
@@ -109,10 +134,10 @@ const Marketing = () => {
   );
 };
 
-const PromoDialog = ({ promo, onSave }: { promo: AdminPromo; onSave: (p: AdminPromo) => void }) => {
-  const [p, setP] = useState<AdminPromo>(promo);
+const PromoDialog = ({ promo, onSave }: { promo: PromoRecord; onSave: (p: PromoRecord) => void }) => {
+  const [p, setP] = useState<PromoRecord>(promo);
   useEffect(() => setP(promo), [promo]);
-  const set = <K extends keyof AdminPromo>(k: K, v: AdminPromo[K]) => setP({ ...p, [k]: v });
+  const set = <K extends keyof PromoRecord>(k: K, v: PromoRecord[K]) => setP({ ...p, [k]: v });
   return (
     <DialogContent>
       <DialogHeader><DialogTitle>{promo.id ? "Edit code" : "New code"}</DialogTitle></DialogHeader>

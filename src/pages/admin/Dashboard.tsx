@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { StatCard } from "@/components/admin/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,15 +6,33 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart, ResponsiveContainer, Cell, Pie, PieChart } from "recharts";
-import { kpis, revenueSeries, channelMix, products, orders, inr } from "@/lib/adminMockData";
+import { inr } from "@/lib/format";
+import { useEffect, useState } from "react";
+import { getAdminSummary } from "@/lib/api";
 import { Download } from "lucide-react";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--leaf))", "hsl(var(--forest))", "hsl(var(--mist))", "hsl(var(--muted-foreground))"];
 
 const Dashboard = () => {
   useEffect(() => { document.title = "Dashboard · Nutrix Admin"; }, []);
-  const recent = orders.slice(0, 6);
-  const top = [...products].sort((a, b) => b.sold30d - a.sold30d).slice(0, 5);
+  const [kpis, setKpis] = useState<any>(null);
+  const [revenueSeries, setRevenueSeries] = useState<any[]>([]);
+  const [channelMix, setChannelMix] = useState<any[]>([]);
+  const [recent, setRecent] = useState<any[]>([]);
+  const [top, setTop] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getAdminSummary();
+        setKpis(data.kpis);
+        setRevenueSeries(data.revenueSeries || []);
+        setChannelMix(data.channelMix || []);
+        setRecent(data.recentOrders || []);
+        setTop(data.topProducts || []);
+      } catch (err) { console.error(err); }
+    })();
+  }, []);
 
   return (
     <AdminLayout
@@ -24,12 +41,12 @@ const Dashboard = () => {
       actions={<Button variant="outline" size="sm"><Download className="w-4 h-4 mr-1.5" /> Export</Button>}
     >
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <StatCard label="Revenue" value={inr(kpis.revenue.value)} delta={kpis.revenue.delta} hint="vs prev 30d" />
-        <StatCard label="Orders" value={kpis.orders.value.toLocaleString()} delta={kpis.orders.delta} />
-        <StatCard label="Customers" value={kpis.customers.value.toLocaleString()} delta={kpis.customers.delta} />
-        <StatCard label="AOV" value={inr(kpis.aov.value)} delta={kpis.aov.delta} />
-        <StatCard label="Conv. rate" value={`${kpis.conversion.value}%`} delta={kpis.conversion.delta} />
-        <StatCard label="Refund rate" value={`${kpis.refundRate.value}%`} delta={kpis.refundRate.delta} />
+        <StatCard label="Revenue" value={inr(kpis?.revenue?.value ?? 0)} delta={kpis?.revenue?.delta ?? 0} hint="vs prev 30d" />
+        <StatCard label="Orders" value={(kpis?.orders?.value ?? 0).toLocaleString()} delta={kpis?.orders?.delta ?? 0} />
+        <StatCard label="Customers" value={(kpis?.customers?.value ?? 0).toLocaleString()} delta={kpis?.customers?.delta ?? 0} />
+        <StatCard label="AOV" value={inr(kpis?.aov?.value ?? 0)} delta={kpis?.aov?.delta ?? 0} />
+        <StatCard label="Conv. rate" value={`${kpis?.conversion?.value ?? 0}%`} delta={kpis?.conversion?.delta ?? 0} />
+        <StatCard label="Refund rate" value={`${kpis?.refundRate?.value ?? 0}%`} delta={kpis?.refundRate?.delta ?? 0} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

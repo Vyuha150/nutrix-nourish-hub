@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BarChart3, Package, ShoppingCart, Users,
-  FileText, Megaphone, Settings, Leaf,
+  FileText, Megaphone, Settings, Leaf, BadgePercent, FlaskConical,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -15,12 +15,14 @@ const main = [
 
 const commerce = [
   { title: "Products", url: "/admin/products", icon: Package },
+  { title: "Hot Offers", url: "/admin/offers", icon: BadgePercent },
   { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
   { title: "Customers", url: "/admin/customers", icon: Users },
 ];
 
 const content = [
   { title: "Pages & Content", url: "/admin/content", icon: FileText },
+  { title: "Lab Reports", url: "/admin/lab-reports", icon: FlaskConical },
   { title: "Marketing", url: "/admin/marketing", icon: Megaphone },
 ];
 

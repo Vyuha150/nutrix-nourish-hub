@@ -8,20 +8,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, Eye } from "lucide-react";
-import { orders as seed, AdminOrder, inr } from "@/lib/adminMockData";
+import { inr } from "@/lib/format";
+import { getOrders, updateOrder } from "@/lib/api";
+import type { OrderRecord } from "@/lib/types";
 import { toast } from "sonner";
 
-const statusVariant: Record<AdminOrder["status"], "default" | "secondary" | "outline" | "destructive"> = {
-  pending: "secondary", processing: "secondary", shipped: "default",
+const statusVariant: Record<OrderRecord["status"], "default" | "secondary" | "outline" | "destructive"> = {
+  pending: "secondary", confirmed: "default", processing: "secondary", shipped: "default",
   delivered: "default", cancelled: "outline", refunded: "destructive",
 };
 
 const Orders = () => {
   useEffect(() => { document.title = "Orders · Nutrix Admin"; }, []);
-  const [items, setItems] = useState<AdminOrder[]>(seed);
+  const [items, setItems] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<string>("all");
-  const [view, setView] = useState<AdminOrder | null>(null);
+  const [view, setView] = useState<OrderRecord | null>(null);
 
   const filtered = useMemo(() => {
     const n = q.toLowerCase().trim();
@@ -31,10 +33,26 @@ const Orders = () => {
     );
   }, [items, q, filter]);
 
-  const updateStatus = (id: string, status: AdminOrder["status"]) => {
-    setItems(items.map((o) => (o.id === id ? { ...o, status } : o)));
-    toast.success(`Order ${id} → ${status}`);
+  const updateStatus = async (id: string, status: OrderRecord["status"]) => {
+    try {
+      const updated = await updateOrder(id, { status });
+      setItems((prev) => prev.map((o) => (o.id === id ? updated : o)));
+      toast.success(`Order ${id} → ${status}`);
+    } catch (err: any) {
+      toast.error(err.message || String(err));
+    }
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getOrders();
+        setItems(data as any[]);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
 
   return (
     <AdminLayout title="Orders" description={`${items.length} orders · ${inr(items.reduce((s, o) => s + o.total, 0))} total volume`}>
@@ -48,8 +66,9 @@ const Orders = () => {
             <Select value={filter} onValueChange={setFilter}>
               <SelectTrigger className="w-[160px] h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["all", "pending", "processing", "shipped", "delivered", "cancelled", "refunded"].map((s) =>
-                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                {["all", "pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "refunded"].map((s) => (
+                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -100,11 +119,12 @@ const Orders = () => {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Update status</p>
-                  <Select value={view.status} onValueChange={(v: AdminOrder["status"]) => { updateStatus(view.id, v); setView({ ...view, status: v }); }}>
+                  <Select value={view.status} onValueChange={(v: OrderRecord["status"]) => { updateStatus(view.id, v); setView({ ...view, status: v }); }}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {(["pending", "processing", "shipped", "delivered", "cancelled", "refunded"] as const).map((s) =>
-                        <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                      {(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "refunded"] as const).map((s) => (
+                        <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

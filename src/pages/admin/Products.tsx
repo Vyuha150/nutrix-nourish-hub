@@ -10,16 +10,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
-import { products as seed, AdminProduct, inr } from "@/lib/adminMockData";
+import { inr } from "@/lib/format";
+import { createProduct, updateProduct, deleteProduct, getProducts } from "@/lib/api";
+import type { ProductRecord } from "@/lib/types";
 import { toast } from "sonner";
 
-const empty: AdminProduct = { id: "", name: "", category: "Daily Foundation", form: "", price: 0, mrp: 0, stock: 0, status: "draft", rating: 0, reviews: 0, sold30d: 0 };
+const empty: ProductRecord = { id: "", name: "", category: "Daily Foundation", form: "", price: 0, mrp: 0, stock: 0, status: "draft", rating: 0, reviews: 0, sold30d: 0, imageKey: "powder", showcaseGroup: "catalog", bestTime: "Anytime", featured: false };
 
 const Products = () => {
   useEffect(() => { document.title = "Products · Nutrix Admin"; }, []);
-  const [items, setItems] = useState<AdminProduct[]>(seed);
+  const [items, setItems] = useState<any[]>([]);
   const [q, setQ] = useState("");
-  const [editing, setEditing] = useState<AdminProduct | null>(null);
+    const [editing, setEditing] = useState<ProductRecord | null>(null);
   const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => {
@@ -27,23 +29,44 @@ const Products = () => {
     return n ? items.filter((p) => p.name.toLowerCase().includes(n) || p.category.toLowerCase().includes(n) || p.id.toLowerCase().includes(n)) : items;
   }, [items, q]);
 
-  const onSave = (p: AdminProduct) => {
-    if (!p.name.trim()) { toast.error("Name is required"); return; }
-    if (p.id && items.find((i) => i.id === p.id)) {
-      setItems(items.map((i) => (i.id === p.id ? p : i)));
-      toast.success(`Updated ${p.name}`);
-    } else {
-      const id = `P-${(items.length + 1).toString().padStart(3, "0")}`;
-      setItems([{ ...p, id }, ...items]);
-      toast.success(`Created ${p.name}`);
+  const onSave = async (p: any) => {
+    try {
+      if (!p.name.trim()) { toast.error("Name is required"); return; }
+      if (p.id) {
+        const updated = await updateProduct(p.id, p);
+        setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+        toast.success(`Updated ${p.name}`);
+      } else {
+        const created = await createProduct(p);
+        setItems((prev) => [created, ...prev]);
+        toast.success(`Created ${p.name}`);
+      }
+      setOpen(false); setEditing(null);
+    } catch (err: any) {
+      toast.error(err.message || String(err));
     }
-    setOpen(false); setEditing(null);
   };
 
-  const onDelete = (p: AdminProduct) => {
-    setItems(items.filter((i) => i.id !== p.id));
-    toast.success(`Deleted ${p.name}`);
+  const onDelete = async (p: any) => {
+    try {
+      await deleteProduct(p.id);
+      setItems((prev) => prev.filter((i) => i.id !== p.id));
+      toast.success(`Deleted ${p.name}`);
+    } catch (err: any) {
+      toast.error(err.message || String(err));
+    }
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getProducts();
+        setItems(data as any[]);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
 
   return (
     <AdminLayout
@@ -108,10 +131,10 @@ const Products = () => {
   );
 };
 
-const ProductDialog = ({ product, onSave }: { product: AdminProduct; onSave: (p: AdminProduct) => void }) => {
-  const [p, setP] = useState<AdminProduct>(product);
+const ProductDialog = ({ product, onSave }: { product: ProductRecord; onSave: (p: ProductRecord) => void }) => {
+  const [p, setP] = useState<ProductRecord>(product);
   useEffect(() => setP(product), [product]);
-  const set = <K extends keyof AdminProduct>(k: K, v: AdminProduct[K]) => setP({ ...p, [k]: v });
+  const set = <K extends keyof ProductRecord>(k: K, v: ProductRecord[K]) => setP({ ...p, [k]: v });
   return (
     <DialogContent className="max-w-lg">
       <DialogHeader><DialogTitle>{p.id ? "Edit product" : "New product"}</DialogTitle></DialogHeader>

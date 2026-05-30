@@ -4,6 +4,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Check, Sparkles, RotateCcw, ShoppingBag, Clock, Pill } from "lucide-react";
+import { useCommerce } from "./CommerceProvider";
+import { resolveGoalStackProducts } from "@/lib/goalStacks";
 
 type Question = { id: string; q: string; opts: string[] };
 type Template = {
@@ -164,6 +166,7 @@ type Props = {
 };
 
 export const GoalConsultDialog = ({ goal, onClose }: Props) => {
+  const { products, addProductsToCart } = useCommerce();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -177,6 +180,7 @@ export const GoalConsultDialog = ({ goal, onClose }: Props) => {
   if (!goal) return null;
   const qs = questions[goal] ?? [];
   const tpl = templates[goal];
+  const matchedProducts = resolveGoalStackProducts(goal, products, tpl.products.map((entry) => entry.name));
 
   const handleSubmit = () => {
     const missing = qs.filter((q) => !answers[q.id]);
@@ -300,7 +304,14 @@ export const GoalConsultDialog = ({ goal, onClose }: Props) => {
             </div>
 
             <div className="flex flex-wrap gap-2 mt-2">
-              <Button onClick={onClose} className="rounded-full bg-primary hover:bg-forest text-primary-foreground gap-2 flex-1">
+              <Button
+                onClick={() => {
+                  if (addProductsToCart(matchedProducts)) {
+                    onClose();
+                  }
+                }}
+                className="rounded-full bg-primary hover:bg-forest text-primary-foreground gap-2 flex-1"
+              >
                 <ShoppingBag className="w-4 h-4" /> Add stack to cart
               </Button>
               <Button

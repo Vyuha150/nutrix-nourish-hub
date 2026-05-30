@@ -1,111 +1,29 @@
-import { Sparkles, ChefHat, Cookie, GlassWater, Pill, Soup, ArrowUpRight } from "lucide-react";
-import foundation from "@/assets/cat-foundation.jpg";
-import boosters from "@/assets/cat-boosters.jpg";
-import snacks from "@/assets/cat-snacks.jpg";
-import beverages from "@/assets/cat-beverages.jpg";
-import capsules from "@/assets/cat-capsules.jpg";
-import pastes from "@/assets/cat-pastes.jpg";
+import { useMemo } from "react";
+import { ArrowUpRight, ChefHat, Cookie, GlassWater, Pill, Soup, Sparkles } from "lucide-react";
+import { useCommerce } from "./CommerceProvider";
+import { resolveProductImage } from "@/lib/productMedia";
 
-const categories = [
-  {
-    name: "Daily Foundation",
-    desc: "The non-negotiable base — what every adult needs, every day.",
-    image: foundation,
-    icon: Sparkles,
-    forms: ["Powder", "Softgel", "Tablet"],
-    actives: 18,
-    items: [
-      "Complete daily powder (30-in-1 micronutrient)",
-      "Vitamin D3 + K2 daily tablet",
-      "Omega-3 softgel (algae-derived)",
-      "Immunity base powder",
-      "Gut health prebiotic powder",
-    ],
-  },
-  {
-    name: "Meal Boosters",
-    desc: "Slot into the foods you already cook. Zero behavior change.",
-    image: boosters,
-    icon: ChefHat,
-    forms: ["Powder", "Premix", "Flour"],
-    actives: 12,
-    items: [
-      "Protein topper for rice & dal",
-      "Fortified wheat flour blend",
-      "Nutrient-dense atta premix",
-      "Spirulina + moringa shake powder",
-      "High-protein dosa premix",
-      "Millet multi-grain blend",
-      "Iron-rich ragi powder",
-    ],
-  },
-  {
-    name: "Snacks & Ready-to-Eat",
-    desc: "Functional nutrition that actually tastes like a snack.",
-    image: snacks,
-    icon: Cookie,
-    forms: ["Bar", "Mix", "Bite"],
-    actives: 9,
-    items: [
-      "Fortified chikki (jaggery + seed bar)",
-      "Baked makhana packs",
-      "Protein muesli bar",
-      "Multigrain cracker pack",
-      "Roasted seed trail mix",
-      "Fortified poha ready-mix",
-      "Nutritional biscuits (iron / calcium)",
-    ],
-  },
-  {
-    name: "Beverages",
-    desc: "Hydration with a job to do.",
-    image: beverages,
-    icon: GlassWater,
-    forms: ["Powder", "Premix"],
-    actives: 7,
-    items: [
-      "Green tea + ashwagandha blend",
-      "Turmeric latte premix",
-      "Protein lassi powder",
-      "Daily greens drink powder",
-    ],
-  },
-  {
-    name: "Functional Capsules & Tablets",
-    desc: "Targeted actives where dosing precision matters.",
-    image: capsules,
-    icon: Pill,
-    forms: ["Tablet", "Softgel", "Capsule"],
-    actives: 14,
-    items: [
-      "Multivitamin tablet (adults & kids)",
-      "Sleep support melatonin softgel",
-      "Zinc + Vitamin C immunity tablet",
-      "Hair-skin-nails biotin tablet",
-      "Digestive enzyme capsule",
-    ],
-  },
-  {
-    name: "Pastes, Toppings & Condiments",
-    desc: "Built into Indian flavor formats. Not bolted on.",
-    image: pastes,
-    icon: Soup,
-    forms: ["Jar", "Sprinkle", "Paste"],
-    actives: 8,
-    items: [
-      "Seed butter blend (sunflower + pumpkin)",
-      "Nutritional yeast sprinkle",
-      "Superfood jam (amla + fig)",
-      "Protein-rich chutney powder",
-      "Calcium-fortified til paste",
-    ],
-  },
-];
+const categoryMeta: Record<string, { desc: string; icon: typeof Sparkles; forms: string[] }> = {
+  "Daily Foundation": { desc: "The non-negotiable base — what every adult needs, every day.", icon: Sparkles, forms: ["Powder", "Softgel", "Tablet"] },
+  "Meal Boosters": { desc: "Slot into the foods you already cook. Zero behavior change.", icon: ChefHat, forms: ["Powder", "Premix", "Flour"] },
+  Snacks: { desc: "Functional nutrition that actually tastes like a snack.", icon: Cookie, forms: ["Bar", "Mix", "Bite"] },
+  Beverages: { desc: "Hydration with a job to do.", icon: GlassWater, forms: ["Powder", "Premix"] },
+  Capsules: { desc: "Targeted actives where dosing precision matters.", icon: Pill, forms: ["Tablet", "Softgel", "Capsule"] },
+  Toppings: { desc: "Built into Indian flavor formats. Not bolted on.", icon: Soup, forms: ["Jar", "Sprinkle", "Paste"] },
+};
 
-const totalItems = categories.reduce((s, c) => s + c.items.length, 0);
-const totalActives = categories.reduce((s, c) => s + c.actives, 0);
+export const Products = () => {
+  const { products } = useCommerce();
+  const categories = useMemo(() => {
+    const grouped = new Map<string, typeof products>();
+    products.forEach((product) => grouped.set(product.category, [...(grouped.get(product.category) ?? []), product]));
+    return Array.from(grouped.entries()).map(([name, items]) => ({ name, items, ...(categoryMeta[name] ?? categoryMeta["Daily Foundation"]) }));
+  }, [products]);
 
-export const Products = () => (
+  const totalItems = products.length;
+  const totalActives = categories.length;
+
+  return (
   <section id="products" className="relative py-24 md:py-32 bg-dew/40 overflow-hidden">
     {/* futuristic grid backdrop */}
     <div
@@ -137,7 +55,7 @@ export const Products = () => (
           {[
             ["6", "Categories"],
             [`${totalItems}`, "Products"],
-            [`${totalActives}+`, "Actives"],
+            [`${totalActives}+`, "Groups"],
           ].map(([n, l], i) => (
             <div
               key={l}
@@ -162,14 +80,7 @@ export const Products = () => (
           >
             {/* Image header */}
             <div className="relative aspect-[16/10] overflow-hidden">
-              <img
-                src={c.image}
-                alt={c.name}
-                width={800}
-                height={500}
-                loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
+              <img src={resolveProductImage(c.items[0] ?? { name: c.name, category: c.name, imageKey: "powder" })} alt={c.name} width={800} height={500} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/30 to-transparent" />
               {/* number */}
               <span className="absolute top-4 right-4 font-serif text-xs px-2.5 py-1 rounded-full bg-background/90 text-primary backdrop-blur">
@@ -204,17 +115,17 @@ export const Products = () => (
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="font-serif text-2xl text-primary leading-none">{c.actives}</div>
-                  <div className="text-[9px] uppercase tracking-[0.16em] text-muted-foreground mt-1">Actives</div>
+                  <div className="font-serif text-2xl text-primary leading-none">{c.items.length}</div>
+                  <div className="text-[9px] uppercase tracking-[0.16em] text-muted-foreground mt-1">Items</div>
                 </div>
               </div>
 
               {/* Items list with bullets */}
               <ul className="mt-4 space-y-2 flex-1">
-                {c.items.slice(0, 4).map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-xs text-forest leading-relaxed">
+                  {c.items.slice(0, 4).map((item) => (
+                    <li key={item.id} className="flex items-start gap-2 text-xs text-forest leading-relaxed">
                     <span className="mt-1.5 w-1 h-1 rounded-full bg-leaf shrink-0" />
-                    <span>{item}</span>
+                      <span>{item.name}</span>
                   </li>
                 ))}
                 {c.items.length > 4 && (
@@ -237,3 +148,4 @@ export const Products = () => (
     </div>
   </section>
 );
+};

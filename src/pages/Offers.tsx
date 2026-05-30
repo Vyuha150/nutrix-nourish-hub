@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
-import { Flame, Clock, Tag } from "lucide-react";
+import { Flame, Clock, Tag, ShoppingBag } from "lucide-react";
 import hero from "@/assets/cat-snacks.jpg";
-import prodPowder from "@/assets/prod-powder.jpg";
-import prodSoftgel from "@/assets/prod-softgel.jpg";
-import prodTablet from "@/assets/prod-tablet.jpg";
-import prodBar from "@/assets/prod-bar.jpg";
-
-const deals = [
-  { name: "Foundation Trio Bundle", desc: "Daily Powder + D3·K2 + Omega-3", was: 3597, now: 2599, off: 28, img: prodPowder, badge: "BUNDLE" },
-  { name: "Sleep Reset Stack", desc: "Magnesium glycinate + Ashwagandha + Melatonin", was: 1797, now: 1299, off: 28, img: prodSoftgel, badge: "STACK" },
-  { name: "Immunity Pack", desc: "Vitamin C + Zinc + D3 + Elderberry", was: 1497, now: 1049, off: 30, img: prodTablet, badge: "STACK" },
-  { name: "Snack Sampler", desc: "Chikki + Trail Mix + Muesli Bars", was: 1397, now: 949, off: 32, img: prodBar, badge: "TASTE" },
-];
+import { useCommerce } from "@/components/nutrix/CommerceProvider";
+import { resolveProductImage } from "@/lib/productMedia";
 
 const useCountdown = () => {
   const [t, setT] = useState({ h: 5, m: 42, s: 18 });
@@ -33,9 +24,14 @@ const useCountdown = () => {
 };
 
 const Offers = () => {
+  const { offers, products, addToCart } = useCommerce();
   useEffect(() => { document.title = "Hot Offers · Nutrix"; }, []);
   const t = useCountdown();
   const fmt = (n: number) => String(n).padStart(2, "0");
+  const deals = useMemo(
+    () => offers.map((offer) => ({ ...offer, product: products.find((product) => product.id === offer.productId) })),
+    [offers, products]
+  );
   return (
     <Layout>
       <PageHero
@@ -71,30 +67,31 @@ const Offers = () => {
           <div className="grid md:grid-cols-2 gap-6">
             {deals.map((d, i) => (
               <article
-                key={d.name}
+                key={d.id}
                 className="group relative rounded-3xl overflow-hidden shadow-soft hover:shadow-card transition-all bg-card border border-border animate-fade-up"
                 style={{ animationDelay: `${i * 0.07}s` }}
               >
                 <div className="grid grid-cols-2">
                   <div className="relative aspect-square overflow-hidden">
-                    <img src={d.img} alt={d.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img src={resolveProductImage(d.product ?? { name: d.title, category: "Hot Offer", imageKey: "bar" })} alt={d.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     <span className="absolute top-3 left-3 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full bg-leaf text-leaf-foreground">{d.badge}</span>
                   </div>
                   <div className="p-6 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-2 text-leaf mb-2">
                         <Tag className="w-3.5 h-3.5" />
-                        <span className="text-[10px] uppercase tracking-[0.18em] font-semibold">{d.off}% off</span>
+                        <span className="text-[10px] uppercase tracking-[0.18em] font-semibold">{d.discountPercent}% off</span>
                       </div>
-                      <h3 className="font-serif text-2xl text-primary leading-tight">{d.name}</h3>
-                      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{d.desc}</p>
+                      <h3 className="font-serif text-2xl text-primary leading-tight">{d.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{d.description}</p>
                     </div>
                     <div>
                       <div className="flex items-baseline gap-2 mt-4">
-                        <span className="font-serif text-3xl text-primary">₹{d.now}</span>
-                        <span className="text-sm text-muted-foreground line-through">₹{d.was}</span>
+                        <span className="font-serif text-3xl text-primary">₹{d.nowPrice}</span>
+                        <span className="text-sm text-muted-foreground line-through">₹{d.wasPrice}</span>
                       </div>
-                      <button className="mt-4 w-full h-11 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors">
+                      <button onClick={() => d.product && addToCart(d.product)} className="mt-4 w-full h-11 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors inline-flex items-center justify-center gap-2">
+                        <ShoppingBag className="w-3.5 h-3.5" />
                         Add bundle
                       </button>
                     </div>

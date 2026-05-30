@@ -16,7 +16,10 @@
   },
   "dependencies": {
     "@types/cors": "^2.8.19",
+    "@types/dotenv": "^8.2.3",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongodb": "^6.20.0"
   }
 }

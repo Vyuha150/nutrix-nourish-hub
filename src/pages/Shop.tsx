@@ -1,34 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Heart, ShoppingBag, Star, Filter, Search, X } from "lucide-react";
+import hero from "@/assets/hero-1.jpg";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
-import { Heart, Star, Filter, Search, X } from "lucide-react";
-import hero from "@/assets/hero-1.jpg";
-import prodPowder from "@/assets/prod-powder.jpg";
-import prodTablet from "@/assets/prod-tablet.jpg";
-import prodSoftgel from "@/assets/prod-softgel.jpg";
-import prodJar from "@/assets/prod-jar.jpg";
-import prodBar from "@/assets/prod-bar.jpg";
-import prodButter from "@/assets/prod-butter.jpg";
-
-const categories = ["All", "Daily Foundation", "Meal Boosters", "Snacks", "Beverages", "Capsules", "Toppings"];
-
-const products = [
-  { name: "Complete Daily Foundation", cat: "Daily Foundation", form: "Powder · 300g", price: 1499, mrp: 1899, img: prodPowder, rating: 4.8, reviews: 218, bestTime: "Morning" },
-  { name: "Vitamin D3 + K2 (MK-7)", cat: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, img: prodTablet, rating: 4.7, reviews: 184, bestTime: "Morning" },
-  { name: "Omega-3 Algal Softgel", cat: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, img: prodSoftgel, rating: 4.9, reviews: 142, bestTime: "Evening" },
-  { name: "Spirulina + Moringa Shake", cat: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, img: prodPowder, rating: 4.6, reviews: 96, bestTime: "Morning" },
-  { name: "Iron-Rich Ragi Powder", cat: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, img: prodPowder, rating: 4.5, reviews: 64, bestTime: "Afternoon" },
-  { name: "High-Protein Dosa Premix", cat: "Meal Boosters", form: "Pouch · 500g", price: 349, mrp: 449, img: prodJar, rating: 4.4, reviews: 41, bestTime: "Morning" },
-  { name: "Fortified Chikki Bar", cat: "Snacks", form: "Pack of 12", price: 599, mrp: 749, img: prodBar, rating: 4.7, reviews: 88, bestTime: "Afternoon" },
-  { name: "Roasted Seed Trail Mix", cat: "Snacks", form: "Pouch · 200g", price: 299, mrp: 399, img: prodBar, rating: 4.6, reviews: 53, bestTime: "Anytime" },
-  { name: "Daily Greens Drink", cat: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, img: prodPowder, rating: 4.8, reviews: 71, bestTime: "Morning" },
-  { name: "Turmeric Latte Premix", cat: "Beverages", form: "Powder · 150g", price: 449, mrp: 549, img: prodJar, rating: 4.5, reviews: 38, bestTime: "Night" },
-  { name: "Multivitamin (Adults)", cat: "Capsules", form: "Tablet · 60ct", price: 549, mrp: 749, img: prodTablet, rating: 4.7, reviews: 167, bestTime: "Morning" },
-  { name: "Sleep Support Melatonin", cat: "Capsules", form: "Softgel · 60ct", price: 499, mrp: 649, img: prodSoftgel, rating: 4.6, reviews: 92, bestTime: "Night" },
-  { name: "Seed Butter Blend", cat: "Toppings", form: "Jar · 250g", price: 549, mrp: 699, img: prodButter, rating: 4.8, reviews: 47, bestTime: "Anytime" },
-  { name: "Nutritional Yeast Sprinkle", cat: "Toppings", form: "Shaker · 100g", price: 299, mrp: 379, img: prodJar, rating: 4.5, reviews: 31, bestTime: "Anytime" },
-];
+import { useCommerce } from "@/components/nutrix/CommerceProvider";
+import { resolveProductImage } from "@/lib/productMedia";
 
 const timeStyles: Record<string, { cls: string; icon: string }> = {
   Morning: { cls: "text-amber-700 bg-amber-50 border-amber-200", icon: "☀️" },
@@ -41,6 +18,7 @@ const timeStyles: Record<string, { cls: string; icon: string }> = {
 const timeFilters = ["All times", "Morning", "Afternoon", "Evening", "Night", "Anytime"];
 
 const Shop = () => {
+  const { products, addToCart, toggleWishlist, isWishlisted } = useCommerce();
   const [active, setActive] = useState("All");
   const [activeTime, setActiveTime] = useState("All times");
   const [params, setParams] = useSearchParams();
@@ -65,12 +43,14 @@ const Shop = () => {
   }, [params]);
 
   const list = useMemo(() => {
-    let res = active === "All" ? products : products.filter((p) => p.cat === active);
+    let res = active === "All" ? products : products.filter((p) => p.category === active);
     if (activeTime !== "All times") res = res.filter((p) => p.bestTime === activeTime);
     if (!q.trim()) return res;
     const needle = q.toLowerCase();
-    return res.filter((p) => p.name.toLowerCase().includes(needle) || p.cat.toLowerCase().includes(needle));
+    return res.filter((p) => p.name.toLowerCase().includes(needle) || p.category.toLowerCase().includes(needle) || p.form.toLowerCase().includes(needle));
   }, [active, activeTime, q]);
+
+  const categories = useMemo(() => ["All", ...Array.from(new Set(products.map((product) => product.category))).sort()], [products]);
 
   const clearQuery = () => {
     setQ("");
@@ -145,27 +125,28 @@ const Shop = () => {
               const isMatch = q.trim() && p.name.toLowerCase() === q.trim().toLowerCase();
               return (
                 <article
-                  key={p.name}
+                  key={p.id}
                   ref={isMatch && !highlightRef.current ? (el) => { highlightRef.current = el; } : undefined}
                   className={`group animate-fade-up ${isMatch ? "ring-2 ring-leaf rounded-3xl p-2 -m-2 bg-leaf/5" : ""}`}
                   style={{ animationDelay: `${i * 0.04}s` }}
                 >
                   <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
-                    <img src={p.img} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img src={resolveProductImage(p)} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     <span className={`absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full border backdrop-blur-sm ${timeStyles[p.bestTime].cls}`}>
                       <span aria-hidden>{timeStyles[p.bestTime].icon}</span> {p.bestTime}
                     </span>
-                    <button className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/85 backdrop-blur flex items-center justify-center hover:bg-background">
-                      <Heart className="w-4 h-4 text-primary" />
+                    <button onClick={() => toggleWishlist(p.id)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/85 backdrop-blur flex items-center justify-center hover:bg-background">
+                      <Heart className={`w-4 h-4 ${isWishlisted(p.id) ? "fill-destructive text-destructive" : "text-primary"}`} />
                     </button>
                     <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                      <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest">
+                      <button onClick={() => addToCart(p)} className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest inline-flex items-center justify-center gap-2">
+                        <ShoppingBag className="w-3.5 h-3.5" />
                         Add to cart
                       </button>
                     </div>
                   </div>
                   <div className="pt-3">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-leaf font-semibold">{p.cat}</p>
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-leaf font-semibold">{p.category}</p>
                     <h3 className="font-serif text-base text-primary mt-1 leading-snug line-clamp-2 min-h-[40px]">{p.name}</h3>
                     <p className="text-xs text-muted-foreground mt-1">{p.form}</p>
                     <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">

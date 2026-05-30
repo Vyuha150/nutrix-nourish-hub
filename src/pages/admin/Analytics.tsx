@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { StatCard } from "@/components/admin/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,34 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
-import { revenueSeries, trafficByPage, products, customers, kpis, inr } from "@/lib/adminMockData";
+import { inr } from "@/lib/format";
+import { getAdminAnalytics } from "@/lib/api";
 
 const Analytics = () => {
   useEffect(() => { document.title = "Analytics · Nutrix Admin"; }, []);
-  const productPerf = [...products].sort((a, b) => b.sold30d - a.sold30d).slice(0, 8);
-  const topCustomers = [...customers].sort((a, b) => b.ltv - a.ltv).slice(0, 8);
+  const [kpis, setKpis] = useState<any>(null);
+  const [revenueSeries, setRevenueSeries] = useState<any[]>([]);
+  const [trafficByPage, setTrafficByPage] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getAdminAnalytics();
+        setKpis(data.kpis);
+        setRevenueSeries(data.revenueSeries || []);
+        setTrafficByPage(data.trafficByPage || []);
+        setProducts(data.products || []);
+        setCustomers(data.customers || []);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
+
+  const productPerf = [...products].sort((a, b) => (b.sold30d || 0) - (a.sold30d || 0)).slice(0, 8);
+  const topCustomers = [...customers].sort((a, b) => (b.ltv || 0) - (a.ltv || 0)).slice(0, 8);
 
   return (
     <AdminLayout title="Analytics" description="Sales, traffic, product, and customer intelligence">
@@ -25,10 +47,10 @@ const Analytics = () => {
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Revenue 30d" value={inr(kpis.revenue.value)} delta={kpis.revenue.delta} />
-            <StatCard label="Orders 30d" value={kpis.orders.value.toLocaleString()} delta={kpis.orders.delta} />
-            <StatCard label="AOV" value={inr(kpis.aov.value)} delta={kpis.aov.delta} />
-            <StatCard label="Conversion" value={`${kpis.conversion.value}%`} delta={kpis.conversion.delta} />
+            <StatCard label="Revenue 30d" value={inr(kpis?.revenue?.value ?? 0)} delta={kpis?.revenue?.delta ?? 0} />
+            <StatCard label="Orders 30d" value={(kpis?.orders?.value ?? 0).toLocaleString()} delta={kpis?.orders?.delta ?? 0} />
+            <StatCard label="AOV" value={inr(kpis?.aov?.value ?? 0)} delta={kpis?.aov?.delta ?? 0} />
+            <StatCard label="Conversion" value={`${kpis?.conversion?.value ?? 0}%`} delta={kpis?.conversion?.delta ?? 0} />
           </div>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base">Revenue & orders</CardTitle></CardHeader>

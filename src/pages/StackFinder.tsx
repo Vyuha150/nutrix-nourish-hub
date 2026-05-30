@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
+import { useCommerce } from "@/components/nutrix/CommerceProvider";
 import { Sparkles, Check, ArrowRight, RotateCcw } from "lucide-react";
 import hero from "@/assets/cat-foundation.jpg";
+import { resolveGoalStackProducts } from "@/lib/goalStacks";
 
 type Step = { q: string; key: string; options: string[] };
 
@@ -27,12 +29,16 @@ const recommendFor = (a: Record<string, string>) => {
 };
 
 const StackFinder = () => {
+  const { products, addProductsToCart } = useCommerce();
   const [step, setStep] = useState(0);
   const [ans, setAns] = useState<Record<string, string>>({});
   useEffect(() => { document.title = "Find Your Stack · Nutrix"; }, []);
   const done = step >= steps.length;
   const recs = done ? recommendFor(ans) : [];
   const reset = () => { setStep(0); setAns({}); };
+  const addStack = () => {
+    addProductsToCart(resolveGoalStackProducts(ans.goal ?? "", products, recs));
+  };
 
   return (
     <Layout>
@@ -111,7 +117,7 @@ const StackFinder = () => {
               </div>
 
               <div className="mt-10 flex flex-wrap gap-3">
-                <button className="h-12 px-7 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:bg-forest transition-colors">
+                <button onClick={addStack} className="h-12 px-7 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:bg-forest transition-colors">
                   Add full stack to cart
                 </button>
                 <button onClick={reset} className="h-12 px-6 rounded-full border border-border bg-card text-primary text-sm font-semibold hover:bg-dew transition-colors inline-flex items-center gap-2">

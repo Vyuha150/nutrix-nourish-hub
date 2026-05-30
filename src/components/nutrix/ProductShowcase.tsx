@@ -1,64 +1,21 @@
-import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, Star } from "lucide-react";
-import prodPowder from "@/assets/prod-powder.jpg";
-import prodTablet from "@/assets/prod-tablet.jpg";
-import prodSoftgel from "@/assets/prod-softgel.jpg";
-import prodJar from "@/assets/prod-jar.jpg";
-import prodBar from "@/assets/prod-bar.jpg";
-import prodButter from "@/assets/prod-butter.jpg";
+import { useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Heart, ShoppingBag, Star } from "lucide-react";
+import { useCommerce } from "./CommerceProvider";
+import { resolveProductImage } from "@/lib/productMedia";
 
-type Product = {
-  name: string;
-  category: string;
-  form: string;
-  price: number;
-  mrp: number;
-  reviews: number;
-  badge?: "NEW" | "BEST" | "BUNDLE";
-  image: string;
-  tone: "forest" | "leaf" | "mist" | "dew";
-};
-
-const bestSellers: Product[] = [
-  { name: "Complete Daily Foundation Powder", category: "Daily Foundation", form: "30-in-1 Powder · 300g", price: 1499, mrp: 1899, reviews: 218, badge: "BEST", image: prodPowder, tone: "forest" },
-  { name: "Vitamin D3 + K2 (MK-7)", category: "Daily Foundation", form: "Tablet · 60ct", price: 449, mrp: 599, reviews: 184, image: prodTablet, tone: "leaf" },
-  { name: "Omega-3 Algal Softgel", category: "Daily Foundation", form: "Softgel · 60ct", price: 899, mrp: 1199, reviews: 142, image: prodSoftgel, tone: "mist" },
-  { name: "Spirulina + Moringa Shake", category: "Meal Boosters", form: "Powder · 250g", price: 699, mrp: 899, reviews: 96, badge: "BEST", image: prodPowder, tone: "dew" },
-  { name: "Multivitamin (Adults)", category: "Capsules & Tablets", form: "Tablet · 60ct", price: 549, mrp: 749, reviews: 167, image: prodTablet, tone: "forest" },
-  { name: "Zinc + Vitamin C Immunity", category: "Capsules & Tablets", form: "Tablet · 60ct", price: 349, mrp: 449, reviews: 121, image: prodJar, tone: "leaf" },
-];
-
-const newArrivals: Product[] = [
-  { name: "Iron-Rich Ragi Powder", category: "Meal Boosters", form: "Powder · 400g", price: 399, mrp: 499, reviews: 12, badge: "NEW", image: prodPowder, tone: "leaf" },
-  { name: "Seed Butter Blend", category: "Pastes & Toppings", form: "Jar · 250g", price: 549, mrp: 699, reviews: 8, badge: "NEW", image: prodButter, tone: "mist" },
-  { name: "Daily Greens Drink", category: "Beverages", form: "Powder · 200g", price: 1099, mrp: 1399, reviews: 21, badge: "NEW", image: prodPowder, tone: "forest" },
-  { name: "Sleep Support Melatonin", category: "Capsules & Tablets", form: "Softgel · 60ct", price: 499, mrp: 649, reviews: 17, badge: "NEW", image: prodSoftgel, tone: "dew" },
-  { name: "Protein Lassi Powder", category: "Beverages", form: "Powder · 400g", price: 799, mrp: 999, reviews: 9, badge: "NEW", image: prodJar, tone: "leaf" },
-  { name: "Fortified Chikki Bar", category: "Snacks", form: "Pack of 12", price: 599, mrp: 749, reviews: 14, badge: "NEW", image: prodBar, tone: "forest" },
-];
-
-const toneStyles: Record<Product["tone"], string> = {
-  forest: "bg-gradient-forest",
-  leaf: "bg-gradient-leaf",
-  mist: "bg-mist",
-  dew: "bg-dew",
-};
-
-const ProductCard = ({ p }: { p: Product }) => {
+const ProductCard = ({ p }: { p: ReturnType<typeof useCommerce>["products"][number] }) => {
   const off = Math.round(((p.mrp - p.price) / p.mrp) * 100);
   return (
     <article className="snap-start shrink-0 w-[260px] md:w-[300px] group">
-      <div className={`relative aspect-[4/5] rounded-2xl ${toneStyles[p.tone]} overflow-hidden shadow-soft group-hover:shadow-card transition-all duration-500`}>
-        {p.badge && (
-          <span className="absolute top-3 left-3 z-10 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full bg-leaf text-leaf-foreground">
-            {p.badge}
-          </span>
-        )}
+      <div className="relative aspect-[4/5] rounded-2xl bg-dew overflow-hidden shadow-soft group-hover:shadow-card transition-all duration-500">
+        <span className="absolute top-3 left-3 z-10 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full bg-leaf text-leaf-foreground">
+          {p.showcaseGroup === "best" ? "BEST" : "NEW"}
+        </span>
         <button className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center hover:bg-background transition-colors">
           <Heart className="w-4 h-4 text-primary" />
         </button>
         <img
-          src={p.image}
+          src={resolveProductImage(p)}
           alt={p.name}
           width={1024}
           height={1024}
@@ -67,7 +24,8 @@ const ProductCard = ({ p }: { p: Product }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="absolute bottom-0 inset-x-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-          <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors">
+          <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors inline-flex items-center justify-center gap-2">
+            <ShoppingBag className="w-3.5 h-3.5" />
             Add to cart
           </button>
         </div>
@@ -78,7 +36,7 @@ const ProductCard = ({ p }: { p: Product }) => {
         <p className="text-xs text-muted-foreground mt-1">{p.form}</p>
         <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
           <Star className="w-3.5 h-3.5 fill-leaf text-leaf" />
-          <span className="text-primary font-medium">4.{(p.reviews % 9) + 1}</span>
+          <span className="text-primary font-medium">{p.rating}</span>
           <span>· {p.reviews} reviews</span>
         </div>
         <div className="flex items-baseline gap-2 mt-2">
@@ -92,9 +50,13 @@ const ProductCard = ({ p }: { p: Product }) => {
 };
 
 export const ProductShowcase = () => {
+  const { products } = useCommerce();
   const [tab, setTab] = useState<"best" | "new">("best");
   const trackRef = useRef<HTMLDivElement>(null);
-  const list = tab === "best" ? bestSellers : newArrivals;
+  const list = useMemo(
+    () => products.filter((product) => (tab === "best" ? product.showcaseGroup === "best" : product.showcaseGroup === "new")),
+    [products, tab]
+  );
 
   const scroll = (dir: 1 | -1) => {
     trackRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
@@ -144,7 +106,7 @@ export const ProductShowcase = () => {
           className="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 -mx-6 px-6 md:-mx-10 md:px-10"
         >
           {list.map((p, i) => (
-            <div key={`${tab}-${i}`} className="animate-fade-up" style={{ animationDelay: `${i * 0.05}s` }}>
+            <div key={p.id} className="animate-fade-up" style={{ animationDelay: `${i * 0.05}s` }}>
               <ProductCard p={p} />
             </div>
           ))}
