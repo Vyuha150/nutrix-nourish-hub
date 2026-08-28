@@ -153,7 +153,7 @@ const ProductDialog = ({ product, onSave }: { product: ProductRecord; onSave: (p
         <div className="space-y-1.5"><Label>MRP (₹)</Label><Input type="number" value={p.mrp} onChange={(e) => set("mrp", +e.target.value)} /></div>
         <div className="space-y-1.5"><Label>Stock</Label><Input type="number" value={p.stock} onChange={(e) => set("stock", +e.target.value)} /></div>
         <div className="space-y-1.5"><Label>Status</Label>
-          <Select value={p.status} onValueChange={(v: AdminProduct["status"]) => set("status", v)}>
+          <Select value={p.status} onValueChange={(v: ProductRecord["status"]) => set("status", v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="draft">Draft</SelectItem><SelectItem value="archived">Archived</SelectItem></SelectContent>
           </Select>
