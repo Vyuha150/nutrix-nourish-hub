@@ -33,8 +33,8 @@ const Index = () => {
       <Philosophy />
       <Products />
       <Science />
-      <OffersTicker />
       <Footer />
+      <OffersTicker />
     </main>
   );
 };
