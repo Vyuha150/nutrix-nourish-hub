@@ -26,6 +26,7 @@ const Index = () => {
       <PromoBar />
       <Header />
       <SubNav />
+      <OffersTicker />
       <HeroCarousel />
       <OffersTicker />
       <PromoGrid />
