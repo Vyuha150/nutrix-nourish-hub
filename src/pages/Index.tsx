@@ -27,6 +27,7 @@ const Index = () => {
       <Header />
       <SubNav />
       <HeroCarousel />
+      <OffersTicker />
       <PromoGrid />
       <CategoryStrip />
       <ProductShowcase />
@@ -34,7 +35,6 @@ const Index = () => {
       <Products />
       <Science />
       <Footer />
-      <OffersTicker />
     </main>
   );
 };
