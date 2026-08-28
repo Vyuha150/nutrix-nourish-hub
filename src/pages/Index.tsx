@@ -32,8 +32,8 @@ const Index = () => {
       <ProductShowcase />
       <Philosophy />
       <Products />
-      
       <Science />
+      <OffersTicker />
       <Footer />
     </main>
   );
