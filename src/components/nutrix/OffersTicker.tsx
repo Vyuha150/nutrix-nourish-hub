@@ -10,7 +10,53 @@ const offers = [
   { icon: Percent, text: "First order welcome code: NUTRIX20" },
 ];
 
-export const OffersTicker = () => {
+interface OffersTickerProps {
+  variant?: "full" | "sleek";
+}
+
+export const OffersTicker = ({ variant = "full" }: OffersTickerProps) => {
+  if (variant === "sleek") {
+    return (
+      <section className="relative overflow-hidden bg-primary text-primary-foreground border-b border-primary-foreground/10">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute -left-20 -top-10 w-56 h-56 rounded-full bg-leaf blur-[90px]" />
+          <div className="absolute -right-20 -bottom-10 w-64 h-64 rounded-full bg-forest blur-[90px]" />
+        </div>
+
+        <div className="relative flex items-center">
+          <div className="shrink-0 hidden md:flex items-center gap-2 px-5 py-2.5 border-r border-primary-foreground/10 bg-primary-foreground/5">
+            <Sparkles className="w-3.5 h-3.5 text-leaf" />
+            <span className="text-[11px] font-semibold uppercase tracking-wider">Loyalty & Offers</span>
+          </div>
+
+          <div className="relative flex-1 overflow-hidden py-2">
+            <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-primary to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-primary to-transparent z-10 pointer-events-none" />
+            <div className="flex w-max animate-ticker hover:[animation-play-state:paused]">
+              {[...offers, ...offers, ...offers, ...offers].map((o, i) => (
+                <div
+                  key={i}
+                  className="group mx-4 flex items-center gap-2.5 text-xs font-medium tracking-wide"
+                >
+                  <o.icon className="w-3.5 h-3.5 text-leaf group-hover:scale-110 transition-transform" />
+                  <span className="text-primary-foreground/90 group-hover:text-primary-foreground transition-colors">
+                    {o.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="shrink-0 hidden md:block px-5 py-2.5 border-l border-primary-foreground/10 bg-primary-foreground/5">
+            <a href="/offers" className="text-[11px] font-semibold uppercase tracking-wider hover:text-leaf transition-colors">
+              View all →
+            </a>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative overflow-hidden bg-primary text-primary-foreground py-12">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
