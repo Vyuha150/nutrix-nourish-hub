@@ -2,7 +2,6 @@ import { PromoBar } from "@/components/nutrix/PromoBar";
 import { Header } from "@/components/nutrix/Header";
 import { SubNav } from "@/components/nutrix/SubNav";
 import { HeroCarousel } from "@/components/nutrix/HeroCarousel";
-import { PromoGrid } from "@/components/nutrix/PromoGrid";
 import { CategoryStrip } from "@/components/nutrix/CategoryStrip";
 import { ProductShowcase } from "@/components/nutrix/ProductShowcase";
 import { Philosophy } from "@/components/nutrix/Philosophy";
@@ -29,7 +28,6 @@ const Index = () => {
       <OffersTicker variant="sleek" />
       <HeroCarousel />
       <OffersTicker />
-      <PromoGrid />
       <CategoryStrip />
       <ProductShowcase />
       <Philosophy />
