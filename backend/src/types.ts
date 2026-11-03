@@ -1,7 +1,7 @@
 export type ProductStatus = "active" | "draft" | "archived";
 export type ProductShowcaseGroup = "best" | "new" | "catalog";
 export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
-export type PaymentStatus = "paid" | "pending" | "refunded";
+export type PaymentStatus = "paid" | "pending" | "refunded" | "failed";
 export type PageType = "Landing" | "Product" | "Editorial" | "System";
 export type PageStatus = "published" | "draft";
 export type CustomerSegment = "VIP" | "Regular" | "New" | "At-risk";
@@ -71,6 +71,7 @@ export interface ProductRecord {
   reviews: number;
   sold30d: number;
   imageKey: string;
+  imageUrl?: string;
   showcaseGroup: ProductShowcaseGroup;
   bestTime: string;
   featured: boolean;
@@ -81,6 +82,7 @@ export interface ProductRecord {
 
 export interface CustomerRecord {
   id: string;
+  userId?: string;
   name: string;
   email: string;
   joined: string;
@@ -97,11 +99,53 @@ export interface OrderLineItem {
   imageKey?: string;
 }
 
+export type ShipmentStatus =
+  | "Order Placed"
+  | "Order Confirmed"
+  | "Processing"
+  | "Packed"
+  | "Shipped"
+  | "Reached Nearest Hub"
+  | "Out for Delivery"
+  | "Delivered"
+  | "Delivery Attempt Failed"
+  | "Returned";
+
+export interface ShipmentEvent {
+  id: string;
+  status: ShipmentStatus;
+  location?: string;
+  district?: string;
+  nearestHub?: string;
+  timestamp: string;
+  carrier?: string;
+  trackingNumber?: string;
+  estimatedDeliveryDate?: string;
+  notes?: string;
+  updatedBy?: string;
+}
+
+export interface ShippingAddress {
+  fullName?: string;
+  phone?: string;
+  building?: string;
+  street?: string;
+  town?: string;
+  mandal?: string;
+  district?: string;
+  state?: string;
+  postalCode?: string;
+  address?: string;
+  city?: string;
+}
+
 export interface OrderRecord {
   id: string;
   customerId: string;
   customer: string;
   email: string;
+  phone?: string;
+  shippingAddress?: ShippingAddress;
   date: string;
   total: number;
   items: number;
@@ -110,6 +154,21 @@ export interface OrderRecord {
   lineItems: OrderLineItem[];
   couponCode?: string;
   paymentId?: string;
+  paymentReference?: string;
+  paymentConfirmedBy?: string;
+  paymentConfirmedAt?: Date | string;
+  paymentFailedBy?: string;
+  paymentFailedAt?: Date | string;
+  paymentNote?: string;
+  shipmentStatus?: ShipmentStatus;
+  shipmentLocation?: string;
+  shipmentDistrict?: string;
+  shipmentNearestHub?: string;
+  shipmentCarrier?: string;
+  shipmentTrackingNumber?: string;
+  estimatedDeliveryDate?: string;
+  shipmentUpdatedAt?: Date | string;
+  shipmentHistory?: ShipmentEvent[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -204,6 +263,7 @@ export type CustomerStats = CustomerRecord & {
   orders: number;
   ltv: number;
   lastOrder: string;
+  isRegistered?: boolean;
 };
 
 export interface AdminSummaryPayload {
@@ -228,4 +288,23 @@ export interface UserStatePayload {
   name: string;
   cart: UserCartItem[];
   wishlist: string[];
+}
+
+export type UserRole = "customer" | "admin";
+
+export interface UserRecord {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  role: UserRole;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface JwtPayload {
+  userId: string;
+  role: UserRole;
+  email?: string;
+  name?: string;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import hero1 from "@/assets/hero-1.jpg";
 import hero2 from "@/assets/hero-2.jpg";
@@ -10,6 +11,7 @@ const slides = [
     title: "Daily Foundation",
     sub: "Stay consistent all spring long",
     cta: "Shop the system",
+    href: "/shop?category=Daily+Foundation",
     image: hero1,
   },
   {
@@ -17,6 +19,7 @@ const slides = [
     title: "Science you can feel.",
     sub: "Clinically dosed. Fully transparent.",
     cta: "Read the science",
+    href: "/science",
     image: hero2,
   },
   {
@@ -24,6 +27,7 @@ const slides = [
     title: "Slot nutrition into food.",
     sub: "Zero behavior change. Maximum density.",
     cta: "Explore boosters",
+    href: "/shop?category=Meal+Boosters",
     image: hero3,
   },
 ];
@@ -72,13 +76,14 @@ export const HeroCarousel = () => {
                 >
                   {s.sub}
                 </p>
-                <button
-                  className="mt-9 inline-flex items-center gap-2 bg-leaf hover:bg-dew text-primary font-semibold px-7 h-12 rounded-full shadow-glow transition-all hover:-translate-y-0.5 animate-fade-up"
+                <Link
+                  to={s.href}
+                  className="mt-9 inline-flex items-center gap-2 bg-leaf hover:bg-dew text-primary font-semibold px-7 h-12 rounded-full shadow-glow transition-all hover:-translate-y-0.5 animate-fade-up cursor-pointer"
                   style={{ animationDelay: "0.3s" }}
                 >
                   {s.cta}
                   <ChevronRight className="w-4 h-4" />
-                </button>
+                </Link>
               </div>
             </div>
           </div>

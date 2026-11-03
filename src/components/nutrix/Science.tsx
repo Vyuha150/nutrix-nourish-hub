@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export const Science = () => (
@@ -15,11 +16,11 @@ export const Science = () => (
             heavy metals and microbial safety. We publish the certificates of analysis, not just the marketing.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <Button size="lg" className="bg-leaf hover:bg-leaf/90 text-primary rounded-full px-7 h-12">
-              See latest CoA
+            <Button asChild size="lg" className="bg-leaf hover:bg-leaf/90 text-primary rounded-full px-7 h-12 font-semibold">
+              <Link to="/lab-reports">See latest CoA</Link>
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-7 h-12 border-mist/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10">
-              Methodology
+            <Button asChild size="lg" variant="outline" className="rounded-full px-7 h-12 border-mist/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-semibold">
+              <Link to="/science">Methodology</Link>
             </Button>
           </div>
         </div>

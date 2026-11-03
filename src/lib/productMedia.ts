@@ -24,12 +24,29 @@ const categoryFallbacks: Array<{ match: RegExp; image: string }> = [
   { match: /beverage|greens|powder|shake/i, image: prodPowder },
 ];
 
-export const resolveProductImage = (product: Pick<ProductRecord, "imageKey" | "category" | "name">) => {
+export const resolveProductFallbackImage = (
+  product: Pick<ProductRecord, "imageKey" | "category" | "name">
+) => {
   const direct = product.imageKey as keyof typeof images | undefined;
   if (direct && images[direct]) {
     return images[direct];
   }
 
-  const categoryMatch = categoryFallbacks.find((entry) => entry.match.test(`${product.category} ${product.name}`));
+  const categoryMatch = categoryFallbacks.find((entry) =>
+    entry.match.test(`${product.category || ""} ${product.name || ""}`)
+  );
   return categoryMatch?.image ?? prodPowder;
+};
+
+export const resolveProductImage = (
+  product: Pick<ProductRecord, "imageKey" | "category" | "name"> & { imageUrl?: string }
+) => {
+  if (product.imageUrl && typeof product.imageUrl === "string") {
+    const trimmed = product.imageUrl.trim();
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return trimmed;
+    }
+  }
+
+  return resolveProductFallbackImage(product);
 };

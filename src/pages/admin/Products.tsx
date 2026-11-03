@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ArrowRight } from "lucide-react";
 import { inr } from "@/lib/format";
 import { createProduct, updateProduct, deleteProduct, getProducts } from "@/lib/api";
+import { resolveProductImage, resolveProductFallbackImage } from "@/lib/productMedia";
 import type { ProductRecord } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -21,13 +22,61 @@ const Products = () => {
   useEffect(() => { document.title = "Products · Nutrix Admin"; }, []);
   const [items, setItems] = useState<any[]>([]);
   const [q, setQ] = useState("");
-    const [editing, setEditing] = useState<ProductRecord | null>(null);
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState<ProductRecord | null>(null);
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQ(q);
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const filtered = useMemo(() => {
-    const n = q.toLowerCase().trim();
+    const n = debouncedQ.toLowerCase().trim();
     return n ? items.filter((p) => p.name.toLowerCase().includes(n) || p.category.toLowerCase().includes(n) || p.id.toLowerCase().includes(n)) : items;
+  }, [items, debouncedQ]);
+
+  const suggestions = useMemo(() => {
+    const n = q.toLowerCase().trim();
+    if (!n) return [];
+    return items
+      .filter((p) => p.name.toLowerCase().includes(n) || p.category.toLowerCase().includes(n) || p.id.toLowerCase().includes(n))
+      .slice(0, 6);
   }, [items, q]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isDropdownOpen || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      const selected = suggestions[activeIndex];
+      setQ(selected.name);
+      setDebouncedQ(selected.name);
+      setIsDropdownOpen(false);
+    } else if (e.key === "Escape") {
+      setIsDropdownOpen(false);
+    }
+  };
 
   const onSave = async (p: any) => {
     try {
@@ -83,9 +132,65 @@ const Products = () => {
     >
       <Card>
         <CardContent className="p-3 md:p-4">
-          <div className="relative max-w-sm mb-3">
+          <div ref={searchBoxRef} className="relative max-w-sm mb-3">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search products…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-8 h-9" />
+            <Input
+              placeholder="Search products…"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setIsDropdownOpen(true);
+                setActiveIndex(-1);
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
+              onKeyDown={handleKeyDown}
+              className="pl-8 h-9"
+            />
+            {isDropdownOpen && q.trim().length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-lg border bg-popover text-popover-foreground shadow-md z-30 overflow-hidden text-xs max-h-72 overflow-y-auto divide-y">
+                {suggestions.map((p, idx) => (
+                  <div
+                    key={p.id}
+                    onClick={() => {
+                      setQ(p.name);
+                      setDebouncedQ(p.name);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`p-2.5 px-3 hover:bg-muted/60 cursor-pointer flex items-center justify-between gap-3 transition-colors ${
+                      idx === activeIndex ? "bg-muted" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded bg-muted border overflow-hidden shrink-0">
+                        <img
+                          src={resolveProductImage(p)}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = resolveProductFallbackImage(p);
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{p.name}</div>
+                        <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                          <span className="font-mono">{p.id}</span>
+                          <span>·</span>
+                          <span>{p.category}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-semibold">{inr(p.price)}</div>
+                      <div className="text-[10px] text-muted-foreground">Stock: {p.stock}</div>
+                    </div>
+                  </div>
+                ))}
+                {suggestions.length === 0 && (
+                  <div className="p-3 text-center text-muted-foreground">No matching products found</div>
+                )}
+              </div>
+            )}
           </div>
           <div className="border rounded-md">
             <Table>
@@ -100,7 +205,24 @@ const Products = () => {
                 {filtered.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-mono text-xs">{p.id}</TableCell>
-                    <TableCell><div className="font-medium">{p.name}</div><div className="text-xs text-muted-foreground">{p.form}</div></TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-md overflow-hidden bg-muted border shrink-0">
+                          <img
+                            src={resolveProductImage(p)}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = resolveProductFallbackImage(p);
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-xs text-muted-foreground">{p.form}</div>
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{p.category}</TableCell>
                     <TableCell className="text-right">{inr(p.price)}</TableCell>
                     <TableCell className={`text-right ${p.stock === 0 ? "text-destructive font-medium" : p.stock < 20 ? "text-amber-600" : ""}`}>{p.stock}</TableCell>
@@ -135,11 +257,58 @@ const ProductDialog = ({ product, onSave }: { product: ProductRecord; onSave: (p
   const [p, setP] = useState<ProductRecord>(product);
   useEffect(() => setP(product), [product]);
   const set = <K extends keyof ProductRecord>(k: K, v: ProductRecord[K]) => setP({ ...p, [k]: v });
+
+  const handleSave = () => {
+    if (!p.name?.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    const url = p.imageUrl?.trim() || "";
+    if (!url) {
+      toast.error("Image URL is required");
+      return;
+    }
+    try {
+      const parsed = new URL(url);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        toast.error("Image URL must be a valid HTTP or HTTPS URL");
+        return;
+      }
+    } catch {
+      toast.error("Image URL must be a valid HTTP or HTTPS URL");
+      return;
+    }
+
+    onSave({ ...p, imageUrl: url });
+  };
+
   return (
     <DialogContent className="max-w-lg">
       <DialogHeader><DialogTitle>{p.id ? "Edit product" : "New product"}</DialogTitle></DialogHeader>
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2 space-y-1.5"><Label>Name</Label><Input value={p.name} onChange={(e) => set("name", e.target.value)} /></div>
+        <div className="col-span-2 space-y-1.5">
+          <Label>Image URL (HTTP/HTTPS) *</Label>
+          <Input
+            type="url"
+            value={p.imageUrl || ""}
+            onChange={(e) => set("imageUrl", e.target.value)}
+            placeholder="https://images.unsplash.com/... or https://example.com/product.jpg"
+          />
+          {p.imageUrl && (
+            <div className="flex items-center gap-3 pt-1">
+              <div className="w-12 h-12 rounded-lg border overflow-hidden bg-muted shrink-0">
+                <img
+                  src={p.imageUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground truncate">Live preview</span>
+            </div>
+          )}
+        </div>
         <div className="space-y-1.5"><Label>Category</Label>
           <Select value={p.category} onValueChange={(v) => set("category", v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -159,7 +328,7 @@ const ProductDialog = ({ product, onSave }: { product: ProductRecord; onSave: (p
           </Select>
         </div>
       </div>
-      <DialogFooter><Button onClick={() => onSave(p)}>Save</Button></DialogFooter>
+      <DialogFooter><Button onClick={handleSave}>Save</Button></DialogFooter>
     </DialogContent>
   );
 };

@@ -9,7 +9,8 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart, Responsive
 import { inr } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { getAdminSummary } from "@/lib/api";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
+import { exportAnalyticsToCsv } from "@/lib/exportAnalyticsCsv";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--leaf))", "hsl(var(--forest))", "hsl(var(--mist))", "hsl(var(--muted-foreground))"];
 
@@ -20,6 +21,17 @@ const Dashboard = () => {
   const [channelMix, setChannelMix] = useState<any[]>([]);
   const [recent, setRecent] = useState<any[]>([]);
   const [top, setTop] = useState<any[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await exportAnalyticsToCsv();
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -38,7 +50,16 @@ const Dashboard = () => {
     <AdminLayout
       title="Dashboard"
       description="Last 30 days overview · all stores"
-      actions={<Button variant="outline" size="sm"><Download className="w-4 h-4 mr-1.5" /> Export</Button>}
+      actions={
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting}>
+          {isExporting ? (
+            <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4 mr-1.5" />
+          )}
+          {isExporting ? "Exporting..." : "Export"}
+        </Button>
+      }
     >
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
         <StatCard label="Revenue" value={inr(kpis?.revenue?.value ?? 0)} delta={kpis?.revenue?.delta ?? 0} hint="vs prev 30d" />
@@ -73,21 +94,29 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Traffic sources</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={channelMix} dataKey="value" nameKey="name" innerRadius={50} outerRadius={85} paddingAngle={2}>
-                  {channelMix.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <ul className="mt-3 space-y-1.5">
-              {channelMix.map((c, i) => (
-                <li key={c.name} className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: COLORS[i % COLORS.length] }} />{c.name}</span>
-                  <span className="text-muted-foreground">{c.value}%</span>
-                </li>
-              ))}
-            </ul>
+            {channelMix.length === 0 ? (
+              <div className="h-[220px] flex items-center justify-center text-xs text-muted-foreground">
+                No traffic data recorded yet.
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={channelMix} dataKey="value" nameKey="name" innerRadius={50} outerRadius={85} paddingAngle={2}>
+                      {channelMix.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <ul className="mt-3 space-y-1.5">
+                  {channelMix.map((c, i) => (
+                    <li key={c.name} className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: COLORS[i % COLORS.length] }} />{c.name}</span>
+                      <span className="text-muted-foreground">{c.value}%</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -110,15 +139,23 @@ const Dashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recent.map((o) => (
-                  <TableRow key={o.id}>
-                    <TableCell className="font-mono text-xs">{o.id}</TableCell>
-                    <TableCell>{o.customer}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{o.date}</TableCell>
-                    <TableCell><Badge variant="secondary" className="capitalize">{o.status}</Badge></TableCell>
-                    <TableCell className="text-right font-medium">{inr(o.total)}</TableCell>
+                {recent.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
+                      No orders placed yet.
+                    </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  recent.map((o) => (
+                    <TableRow key={o.id}>
+                      <TableCell className="font-mono text-xs">{o.id}</TableCell>
+                      <TableCell>{o.customer}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{o.date}</TableCell>
+                      <TableCell><Badge variant="secondary" className="capitalize">{o.status}</Badge></TableCell>
+                      <TableCell className="text-right font-medium">{inr(o.total)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -126,14 +163,20 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Top products (30d)</CardTitle></CardHeader>
           <CardContent>
-            <ChartContainer config={{ sold30d: { label: "Units", color: "hsl(var(--primary))" } }} className="h-[260px] w-full">
-              <BarChart data={top} layout="vertical" margin={{ left: 8 }}>
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={120} tickLine={false} axisLine={false} className="text-xs" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="sold30d" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ChartContainer>
+            {top.length === 0 ? (
+              <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground">
+                No product sales yet.
+              </div>
+            ) : (
+              <ChartContainer config={{ sold30d: { label: "Units", color: "hsl(var(--primary))" } }} className="h-[260px] w-full">
+                <BarChart data={top} layout="vertical" margin={{ left: 8 }}>
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={120} tickLine={false} axisLine={false} className="text-xs" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="sold30d" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
       </div>

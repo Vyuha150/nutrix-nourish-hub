@@ -1,9 +1,11 @@
 import { useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Heart, ShoppingBag, Star } from "lucide-react";
 import { useCommerce } from "./CommerceProvider";
-import { resolveProductImage } from "@/lib/productMedia";
+import { resolveProductImage, resolveProductFallbackImage } from "@/lib/productMedia";
 
 const ProductCard = ({ p }: { p: ReturnType<typeof useCommerce>["products"][number] }) => {
+  const { addToCart, toggleWishlist, isWishlisted } = useCommerce();
+  const wish = isWishlisted(p.id);
   const off = Math.round(((p.mrp - p.price) / p.mrp) * 100);
   return (
     <article className="snap-start shrink-0 w-[260px] md:w-[300px] group">
@@ -11,8 +13,14 @@ const ProductCard = ({ p }: { p: ReturnType<typeof useCommerce>["products"][numb
         <span className="absolute top-3 left-3 z-10 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full bg-leaf text-leaf-foreground">
           {p.showcaseGroup === "best" ? "BEST" : "NEW"}
         </span>
-        <button className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center hover:bg-background transition-colors">
-          <Heart className="w-4 h-4 text-primary" />
+        <button
+          onClick={() => toggleWishlist(p.id)}
+          aria-label={wish ? "Remove from wishlist" : "Add to wishlist"}
+          className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full backdrop-blur flex items-center justify-center transition-colors ${
+            wish ? "bg-rose-500 text-white" : "bg-background/80 text-primary hover:bg-background"
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${wish ? "fill-white" : ""}`} />
         </button>
         <img
           src={resolveProductImage(p)}
@@ -21,10 +29,16 @@ const ProductCard = ({ p }: { p: ReturnType<typeof useCommerce>["products"][numb
           height={1024}
           loading="lazy"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = resolveProductFallbackImage(p);
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="absolute bottom-0 inset-x-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-          <button className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors inline-flex items-center justify-center gap-2">
+          <button
+            onClick={() => addToCart(p)}
+            className="w-full h-10 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:bg-forest transition-colors inline-flex items-center justify-center gap-2 cursor-pointer"
+          >
             <ShoppingBag className="w-3.5 h-3.5" />
             Add to cart
           </button>

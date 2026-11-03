@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { ArrowUpRight, ChefHat, Cookie, GlassWater, Pill, Soup, Sparkles } from "lucide-react";
 import { useCommerce } from "./CommerceProvider";
 import { resolveProductImage } from "@/lib/productMedia";
@@ -73,9 +74,10 @@ export const Products = () => {
       {/* Cards grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {categories.map((c, i) => (
-          <article
+          <Link
             key={c.name}
-            className="group relative rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-card hover:-translate-y-1 transition-all duration-500 animate-fade-up flex flex-col"
+            to={`/shop?category=${encodeURIComponent(c.name)}`}
+            className="group relative rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-card hover:-translate-y-1 transition-all duration-500 animate-fade-up flex flex-col cursor-pointer"
             style={{ animationDelay: `${i * 0.06}s` }}
           >
             {/* Image header */}
@@ -142,7 +144,7 @@ export const Products = () => {
                 />
               </div>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     </div>

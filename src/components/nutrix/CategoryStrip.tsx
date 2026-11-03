@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import foundation from "@/assets/cat-foundation.jpg";
 import boosters from "@/assets/cat-boosters.jpg";
 import snacks from "@/assets/cat-snacks.jpg";
@@ -20,9 +21,9 @@ export const CategoryStrip = () => (
       <p className="label-eyebrow mb-6 text-center">Shop by category</p>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
         {cats.map((c, i) => (
-          <a
+          <Link
             key={c.name}
-            href="#products"
+            to={`/shop?category=${encodeURIComponent(c.name)}`}
             className="group flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-dew/60 transition-colors animate-fade-up"
             style={{ animationDelay: `${i * 0.06}s` }}
           >
@@ -40,7 +41,7 @@ export const CategoryStrip = () => (
               <div className="text-xs font-semibold text-primary leading-tight">{c.name}</div>
               <div className="text-[10px] text-muted-foreground mt-0.5">{c.count} items</div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
 
@@ -49,9 +50,9 @@ export const CategoryStrip = () => (
           { to: "/offers", label: "Hot offers" },
           { to: "/goals", label: "Shop by goal" },
         ].map((b, i) => (
-          <a
+          <Link
             key={b.to}
-            href={b.to}
+            to={b.to}
             className="group relative inline-flex items-center justify-center px-8 h-12 rounded-full text-xs font-semibold uppercase tracking-[0.18em] text-primary overflow-hidden isolate animate-fade-up"
             style={{ animationDelay: `${0.4 + i * 0.08}s` }}
           >
@@ -61,7 +62,7 @@ export const CategoryStrip = () => (
             <span className="relative z-10 transition-all duration-500 group-hover:tracking-[0.22em]">
               {b.label}
             </span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>

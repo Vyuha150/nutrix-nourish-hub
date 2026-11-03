@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
-import { Download, ShieldCheck, QrCode, Search } from "lucide-react";
+import { Download, ShieldCheck, QrCode, Search, CheckCircle2 } from "lucide-react";
 import hero from "@/assets/cat-capsules.jpg";
 import { useCommerce } from "@/components/nutrix/CommerceProvider";
 import { buildApiUrl } from "@/lib/api";
@@ -9,8 +9,49 @@ import { buildApiUrl } from "@/lib/api";
 const LabReports = () => {
   const { labReports } = useCommerce();
   const [q, setQ] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => { document.title = "Lab Reports · Nutrix"; }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const list = useMemo(() => labReports.filter((report) => (report.productName + report.lotNumber).toLowerCase().includes(q.toLowerCase())), [labReports, q]);
+
+  const suggestions = useMemo(() => {
+    const trimmed = q.trim().toLowerCase();
+    if (!trimmed) return [];
+    return labReports
+      .filter((r) => r.productName.toLowerCase().includes(trimmed) || r.lotNumber.toLowerCase().includes(trimmed) || r.labName.toLowerCase().includes(trimmed))
+      .slice(0, 6);
+  }, [labReports, q]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      const chosen = suggestions[activeIndex];
+      setQ(chosen.lotNumber || chosen.productName);
+      setIsOpen(false);
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
 
   const getDownloadHref = (report: (typeof labReports)[number]) => {
     if (report.reportDownloadUrl) {
@@ -52,14 +93,51 @@ const LabReports = () => {
             ))}
           </div>
 
-          <div className="relative mb-6 max-w-md">
+          <div ref={containerRef} className="relative mb-6 max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setIsOpen(true);
+                setActiveIndex(-1);
+              }}
+              onFocus={() => setIsOpen(true)}
+              onKeyDown={handleKeyDown}
               placeholder="Search by product or lot number…"
-              className="w-full h-11 rounded-full bg-dew text-primary placeholder:text-muted-foreground pl-11 pr-5 text-sm outline-none focus:ring-2 focus:ring-leaf"
+              className="w-full h-11 rounded-full bg-dew text-primary placeholder:text-muted-foreground pl-11 pr-5 text-sm outline-none focus:ring-2 focus:ring-leaf transition-all"
             />
+            {isOpen && q.trim().length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl border border-border bg-card shadow-lg z-30 overflow-hidden text-xs max-h-64 overflow-y-auto divide-y divide-border/60">
+                {suggestions.map((r, idx) => (
+                  <div
+                    key={r.id || r.lotNumber}
+                    onClick={() => {
+                      setQ(r.lotNumber || r.productName);
+                      setIsOpen(false);
+                    }}
+                    className={`p-3 px-4 hover:bg-muted/40 cursor-pointer flex items-center justify-between gap-3 transition-colors ${
+                      idx === activeIndex ? "bg-muted/60" : ""
+                    }`}
+                  >
+                    <div>
+                      <div className="font-semibold text-primary">{r.productName}</div>
+                      <div className="text-muted-foreground flex items-center gap-2 mt-0.5">
+                        <span className="font-mono text-[11px] bg-muted px-1.5 py-0.2 rounded">Lot: {r.lotNumber}</span>
+                        <span>· {r.labName}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-leaf/20 text-forest font-semibold block">{r.potency}</span>
+                      <span className="text-[10px] text-muted-foreground block mt-0.5">{r.testedOn}</span>
+                    </div>
+                  </div>
+                ))}
+                {suggestions.length === 0 && (
+                  <div className="p-4 text-center text-muted-foreground">No matching certificates found</div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">

@@ -5,7 +5,8 @@ import hero from "@/assets/hero-1.jpg";
 import { Layout } from "@/components/nutrix/Layout";
 import { PageHero } from "@/components/nutrix/PageHero";
 import { useCommerce } from "@/components/nutrix/CommerceProvider";
-import { resolveProductImage } from "@/lib/productMedia";
+import { resolveProductImage, resolveProductFallbackImage } from "@/lib/productMedia";
+import { CustomerSearchAutocomplete } from "@/components/nutrix/CustomerSearchAutocomplete";
 
 const timeStyles: Record<string, { cls: string; icon: string }> = {
   Morning: { cls: "text-amber-700 bg-amber-50 border-amber-200", icon: "☀️" },
@@ -19,9 +20,10 @@ const timeFilters = ["All times", "Morning", "Afternoon", "Evening", "Night", "A
 
 const Shop = () => {
   const { products, addToCart, toggleWishlist, isWishlisted } = useCommerce();
-  const [active, setActive] = useState("All");
-  const [activeTime, setActiveTime] = useState("All times");
   const [params, setParams] = useSearchParams();
+  const initialCategory = params.get("category") || "All";
+  const [active, setActive] = useState(initialCategory);
+  const [activeTime, setActiveTime] = useState("All times");
   const initialQ = params.get("q") ?? "";
   const [q, setQ] = useState(initialQ);
   const highlightRef = useRef<HTMLElement | null>(null);
@@ -30,11 +32,17 @@ const Shop = () => {
     document.title = "Shop by Product · Nutrix";
   }, []);
 
-  // Sync state when URL query changes (deep link from Nutrients page)
+  // Sync state when URL query changes (deep link from Nutrients page or Hero carousel)
   useEffect(() => {
-    const next = params.get("q") ?? "";
-    setQ(next);
-    if (next) {
+    const nextQ = params.get("q") ?? "";
+    setQ(nextQ);
+    const nextCat = params.get("category");
+    if (nextCat) {
+      setActive(nextCat);
+    } else if (!params.has("category") && active !== "All") {
+      setActive("All");
+    }
+    if (nextQ) {
       // Auto-scroll to first matching product after render
       setTimeout(() => {
         highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -69,6 +77,19 @@ const Shop = () => {
       />
       <section className="py-12 md:py-16 bg-background">
         <div className="container-tight">
+          {/* Shop Search Bar with Autocomplete */}
+          <div className="mb-6 max-w-xl">
+            <CustomerSearchAutocomplete
+              placeholder="Search catalogue by formula name, category, or benefit…"
+              onSelectProduct={(p) => {
+                setQ(p.name);
+                const next = new URLSearchParams(params);
+                next.set("q", p.name);
+                setParams(next, { replace: true });
+              }}
+            />
+          </div>
+
           {q && (
             <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-leaf/30 bg-leaf/10 px-5 py-3 animate-fade-up">
               <p className="text-sm text-forest">
@@ -85,7 +106,16 @@ const Shop = () => {
             {categories.map((c) => (
               <button
                 key={c}
-                onClick={() => setActive(c)}
+                onClick={() => {
+                  setActive(c);
+                  const next = new URLSearchParams(params);
+                  if (c === "All") {
+                    next.delete("category");
+                  } else {
+                    next.set("category", c);
+                  }
+                  setParams(next, { replace: true });
+                }}
                 className={`shrink-0 px-4 h-9 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
                   active === c
                     ? "bg-primary text-primary-foreground shadow-soft"
@@ -131,7 +161,15 @@ const Shop = () => {
                   style={{ animationDelay: `${i * 0.04}s` }}
                 >
                   <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
-                    <img src={resolveProductImage(p)} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img
+                      src={resolveProductImage(p)}
+                      alt={p.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = resolveProductFallbackImage(p);
+                      }}
+                    />
                     <span className={`absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full border backdrop-blur-sm ${timeStyles[p.bestTime].cls}`}>
                       <span aria-hidden>{timeStyles[p.bestTime].icon}</span> {p.bestTime}
                     </span>

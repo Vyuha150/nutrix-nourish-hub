@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "./Logo";
-import { Search, Heart, ShoppingBag, User, Trash2, Plus, Minus, ArrowRight, LayoutDashboard, LogOut, Sparkles } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Trash2, Plus, Minus, ArrowRight, LayoutDashboard, LogOut, Sparkles, LogIn, UserPlus, Package } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -18,17 +18,18 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useCommerce } from "./CommerceProvider";
+import { useAuth } from "@/context/AuthContext";
 import { resolveProductImage } from "@/lib/productMedia";
+import { CustomerSearchAutocomplete } from "./CustomerSearchAutocomplete";
 
 export const Header = () => {
   const navigate = useNavigate();
+  const { user: authUser, isAdmin, signOut: authSignOut } = useAuth();
   const {
     products,
-    user,
+    user: commerceUser,
     cart,
     wishlist,
     cartCount,
@@ -39,12 +40,20 @@ export const Header = () => {
     toggleWishlist,
     isWishlisted,
     clearWishlistItem,
-    signInWithGoogle,
-    signOut,
+    signOut: commerceSignOut,
   } = useCommerce();
+
+  // Combine auth user and fallback commerce user
+  const currentUser = authUser
+    ? { name: authUser.name, email: authUser.email, role: authUser.role }
+    : commerceUser
+    ? { name: commerceUser.name, email: commerceUser.email, role: "customer" }
+    : null;
+
   const [accountOpen, setAccountOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const productLookup = useMemo(() => Object.fromEntries(products.map((product) => [product.id, product])), [products]);
   const cartItems = useMemo(
     () => cart.map((item) => ({ ...item, product: productLookup[item.productId] })),
@@ -89,25 +98,28 @@ export const Header = () => {
             <Logo size={36} variant="dark" />
           </a>
           <div className="col-span-6 hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60" />
-              <input
-                type="search"
-                placeholder="Search formulas, nutrients, goals…"
-                className="w-full h-11 rounded-full bg-dew text-primary placeholder:text-primary/50 pl-11 pr-5 text-sm outline-none focus:ring-2 focus:ring-leaf transition-all"
-              />
-            </div>
+            <CustomerSearchAutocomplete />
           </div>
-          <div className="col-span-3 flex items-center justify-end gap-5">
-            <a
-              href="/admin"
-              aria-label="Admin panel"
-              title="Admin panel"
-              className="relative group inline-flex items-center gap-1.5 px-2.5 h-8 rounded-full bg-leaf/15 hover:bg-leaf/25 text-primary-foreground transition-colors"
+          <div className="col-span-9 md:col-span-3 flex items-center justify-end gap-3 sm:gap-5">
+            {/* Mobile search toggle */}
+            <button
+              onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+              aria-label="Toggle search"
+              className="md:hidden relative group p-1"
             >
-              <LayoutDashboard className="w-4 h-4 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider hidden lg:inline">Admin</span>
-            </a>
+              <Search className="w-5 h-5 transition-transform group-hover:scale-110" />
+            </button>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                aria-label="Admin panel"
+                title="Admin panel"
+                className="relative group inline-flex items-center gap-1.5 px-2.5 h-8 rounded-full bg-leaf/15 hover:bg-leaf/25 text-primary-foreground transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4 transition-transform group-hover:scale-110" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider hidden lg:inline">Admin</span>
+              </Link>
+            )}
             {buttons.map(({ label, Icon, onClick, badge }) => (
               <button
                 key={label}
@@ -125,6 +137,16 @@ export const Header = () => {
             ))}
           </div>
         </div>
+
+        {/* Mobile Search Bar */}
+        {mobileSearchOpen && (
+          <div className="md:hidden container-tight pb-3 animate-fade-in">
+            <CustomerSearchAutocomplete
+              autoFocus
+              onSelectProduct={() => setMobileSearchOpen(false)}
+            />
+          </div>
+        )}
       </header>
 
       {/* Account Dialog */}
@@ -132,49 +154,109 @@ export const Header = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif text-2xl">
-              {user ? "Your account" : "Sign in with Google"}
+              {currentUser ? "Your account" : "Welcome to Nutrix"}
             </DialogTitle>
             <DialogDescription>
-              {user
+              {currentUser
                 ? "Manage your saved cart, wishlist and checkout preferences."
-                : "Use Google to keep your cart and wishlist tied to your account."}
+                : "Sign in to keep your cart and personalized health goals synchronized."}
             </DialogDescription>
           </DialogHeader>
-          {user ? (
+          {currentUser ? (
             <div className="space-y-4">
               <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-leaf/15 grid place-items-center shrink-0">
                   <Sparkles className="w-5 h-5 text-leaf" />
                 </div>
-                <div className="min-w-0">
-                  <p className="font-serif text-lg text-primary truncate">{user.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-serif text-lg text-primary truncate">{currentUser.name}</p>
+                    {isAdmin && (
+                      <span className="px-2 py-0.5 rounded-full bg-leaf/20 text-leaf text-[10px] font-bold uppercase tracking-wider">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate">{currentUser.email}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <button type="button" onClick={() => setWishlistOpen(true)} className="rounded-xl border border-border p-3 text-left hover:bg-dew transition-colors">
+                <button type="button" onClick={() => { setAccountOpen(false); setWishlistOpen(true); }} className="rounded-xl border border-border p-3 text-left hover:bg-dew transition-colors">
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">Wishlist</div>
                   <div className="font-semibold text-primary mt-1">{wishlist.length} items</div>
                 </button>
-                <button type="button" onClick={() => setCartOpen(true)} className="rounded-xl border border-border p-3 text-left hover:bg-dew transition-colors">
+                <button type="button" onClick={() => { setAccountOpen(false); setCartOpen(true); }} className="rounded-xl border border-border p-3 text-left hover:bg-dew transition-colors">
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">Cart</div>
                   <div className="font-semibold text-primary mt-1">{cartCount} items</div>
                 </button>
               </div>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setAccountOpen(false);
+                  navigate("/orders");
+                }}
+                className="w-full gap-2 border-primary/20 hover:bg-mist/40 text-primary"
+              >
+                <Package className="w-4 h-4 text-leaf" /> My Orders
+              </Button>
+
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setAccountOpen(false);
+                    navigate("/admin");
+                  }}
+                  className="w-full gap-2 border-leaf/30 text-leaf hover:bg-leaf/10"
+                >
+                  <LayoutDashboard className="w-4 h-4" /> Go to Admin Dashboard
+                </Button>
+              )}
+
               <DialogFooter className="sm:justify-between gap-2">
-                <Button variant="secondary" onClick={signOut} className="w-full gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    authSignOut();
+                    commerceSignOut();
+                    setAccountOpen(false);
+                  }}
+                  className="w-full gap-2"
+                >
                   <LogOut className="w-4 h-4" /> Sign out
                 </Button>
               </DialogFooter>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-2xl border border-border bg-dew p-4 text-sm text-forest">
-                One Google account keeps your wishlist and cart in sync across visits.
+              <div className="rounded-2xl border border-border bg-dew p-4 text-sm text-forest leading-relaxed">
+                Sign in with your email to keep your cart, custom stacks, and orders synchronized.
               </div>
-              <Button type="button" onClick={async () => { await signInWithGoogle(); setAccountOpen(false); }} className="w-full">
-                Continue with Google
-              </Button>
+              <div className="flex flex-col gap-2.5">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setAccountOpen(false);
+                    navigate("/signin");
+                  }}
+                  className="w-full gap-2 h-11 rounded-full bg-primary hover:bg-forest text-primary-foreground font-medium shadow-soft"
+                >
+                  <LogIn className="w-4 h-4" /> Sign In
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setAccountOpen(false);
+                    navigate("/signup");
+                  }}
+                  className="w-full gap-2 h-11 rounded-full border-primary/20 text-primary hover:bg-mist/40"
+                >
+                  <UserPlus className="w-4 h-4" /> Create an Account
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

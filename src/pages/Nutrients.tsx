@@ -101,8 +101,28 @@ const Nutrients = () => {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search a nutrient or benefit…"
-                className="w-full h-11 rounded-full bg-dew text-primary placeholder:text-muted-foreground pl-11 pr-5 text-sm outline-none focus:ring-2 focus:ring-leaf"
+                className="w-full h-11 rounded-full bg-dew text-primary placeholder:text-muted-foreground pl-11 pr-5 text-sm outline-none focus:ring-2 focus:ring-leaf transition-all"
               />
+              {q.trim() && (
+                <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-border bg-card shadow-lg z-20 overflow-hidden text-xs max-h-60 overflow-y-auto divide-y divide-border/60">
+                  {list.slice(0, 6).map((r) => (
+                    <div
+                      key={r.name}
+                      onClick={() => setQ(r.name.split(" ")[0])}
+                      className="p-2.5 px-4 hover:bg-muted/40 cursor-pointer flex items-center justify-between gap-2"
+                    >
+                      <div>
+                        <span className="font-semibold text-primary">{r.name}</span>
+                        <span className="text-muted-foreground ml-2">· {r.why}</span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted font-medium">{r.type}</span>
+                    </div>
+                  ))}
+                  {list.length === 0 && (
+                    <div className="p-4 text-center text-muted-foreground">No matching nutrients found</div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex gap-2 overflow-x-auto scrollbar-none">
               {types.map((t) => (

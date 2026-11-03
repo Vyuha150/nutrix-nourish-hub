@@ -4,7 +4,7 @@ import { PageHero } from "@/components/nutrix/PageHero";
 import { Flame, Clock, Tag, ShoppingBag } from "lucide-react";
 import hero from "@/assets/cat-snacks.jpg";
 import { useCommerce } from "@/components/nutrix/CommerceProvider";
-import { resolveProductImage } from "@/lib/productMedia";
+import { resolveProductImage, resolveProductFallbackImage } from "@/lib/productMedia";
 
 const useCountdown = () => {
   const [t, setT] = useState({ h: 5, m: 42, s: 18 });
@@ -73,7 +73,15 @@ const Offers = () => {
               >
                 <div className="grid grid-cols-2">
                   <div className="relative aspect-square overflow-hidden">
-                    <img src={resolveProductImage(d.product ?? { name: d.title, category: "Hot Offer", imageKey: "bar" })} alt={d.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img
+                      src={resolveProductImage(d.product ?? { name: d.title, category: "Hot Offer", imageKey: "bar" })}
+                      alt={d.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = resolveProductFallbackImage(d.product ?? { name: d.title, category: "Hot Offer", imageKey: "bar" });
+                      }}
+                    />
                     <span className="absolute top-3 left-3 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full bg-leaf text-leaf-foreground">{d.badge}</span>
                   </div>
                   <div className="p-6 flex flex-col justify-between">

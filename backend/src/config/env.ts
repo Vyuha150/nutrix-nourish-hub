@@ -12,4 +12,8 @@ export const env = {
   mongoDb: process.env.MONGODB_DB ?? "nutrix",
   clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:8080",
   seedDatabase: (process.env.SEED_DATABASE ?? "true").toLowerCase() !== "false",
+  jwtSecret: process.env.JWT_SECRET ?? "",
+  adminEmail: process.env.ADMIN_EMAIL ?? "",
+  adminPassword: process.env.ADMIN_PASSWORD ?? "",
+  adminName: process.env.ADMIN_NAME ?? "",
 };
